@@ -1,0 +1,146 @@
+@using VentanillaUnica.Generics.GenericDisplayName
+@using VentanillaUnica.Models
+@using VentanillaUnica.Services.Solicitud
+@using VentanillaUnica.Services.Solicitud.Enums
+@using VentanillaUnica.Services.Solicitud.Requests
+@inject SolicitudManager SolicitudSvc
+@rendermode InteractiveServer
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+
+        <div class="d-flex align-items-center gap-2 mb-4">
+            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="white" viewBox="0 0 16 16">
+                    <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5L9.5 0zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                </svg>
+            </div>
+            <div class="flex-grow-1">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-0 fw-semibold">Seleccionar trámite</h6>
+                        <small class="text-muted">
+                            <strong>
+                                @Ciudadano.PrimerNombre
+                                @(string.IsNullOrEmpty(Ciudadano.SegundoNombre) ? "" : Ciudadano.SegundoNombre + " ")
+                                @Ciudadano.PrimerApellido
+                            </strong>
+                            — @Ciudadano.NumeroDocumento
+                        </small>
+                    </div>
+                    <div style="min-width:160px;">
+                        <label class="form-label form-label-sm mb-1">Origen</label>
+                        <select class="form-select form-select-sm" @bind="_origen">
+                            @foreach (var o in Enum.GetValues<Origen>())
+                            {
+                                <option value="@o">@o.GetDisplayName()</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (_errorMensaje is not null)
+        {
+            <div class="alert alert-danger py-2 alert-dismissible">
+                <small>@_errorMensaje</small>
+                <button class="btn-close btn-sm" @onclick="() => _errorMensaje = null"></button>
+            </div>
+        }
+
+        <div class="mb-3">
+            <label class="form-label form-label-sm">Descripción / motivo</label>
+            <textarea class="form-control form-control-sm"
+                      @bind="_descripcion"
+                      rows="3"
+                      maxlength="500"
+                      placeholder="Describa brevemente el motivo de la solicitud..."></textarea>
+            <small class="text-muted">@(_descripcion?.Length ?? 0) / 500</small>
+        </div>
+
+        <label class="form-label form-label-sm">Tipo de trámite <span class="text-danger">*</span></label>
+        <div class="d-flex flex-column gap-2 mb-4">
+            @foreach (var t in Tramites)
+            {
+                var seleccionado = _tramiteId == t.Id;
+                <div class="border rounded p-3 d-flex justify-content-between align-items-center"
+                     style="cursor:pointer;
+                            border-color:@(seleccionado ? "#0d6efd" : "#dee2e6") !important;
+                            background:@(seleccionado ? "#f0f6ff" : "white");"
+                     @onclick="() => _tramiteId = t.Id">
+                    <div>
+                        <p class="mb-0 fw-semibold" style="font-size:14px;">@t.Nombre</p>
+                        <small class="text-muted">Tiempo estimado: @t.DiasEstimados días hábiles</small>
+                    </div>
+                    @if (seleccionado)
+                    {
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#0d6efd" viewBox="0 0 16 16">
+                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                        </svg>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <button class="btn btn-outline-secondary" @onclick="() => OnVolver.InvokeAsync()">← Volver</button>
+            <button class="btn btn-primary px-4"
+                    @onclick="RadicarAsync"
+                    disabled="@(_tramiteId == 0 || _cargando)">
+                @if (_cargando)
+                {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                    <span>Radicando...</span>
+                }
+                else
+                {
+                    <span>Radicar solicitud →</span>
+                }
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public Ciudadano       Ciudadano { get; set; } = null!;
+    [Parameter, EditorRequired] public List<Tramite>   Tramites  { get; set; } = [];
+    [Parameter] public EventCallback<Solicitud>        OnSolicitudCreada { get; set; }
+    [Parameter] public EventCallback OnVolver { get; set; }
+
+    private int     _tramiteId    = 0;
+    private bool    _cargando     = false;
+    private string? _errorMensaje;
+    private string? _descripcion;
+    private Origen _origen = Origen.App;
+    
+    private async Task RadicarAsync()
+    {
+        _cargando     = true;
+        _errorMensaje = null;
+
+        try
+        {
+            var request = new CreateSolicitudRequest
+            {
+                CiudadanoId   = Ciudadano.Id,
+                TipoTramiteId = _tramiteId,
+                Observaciones   = _descripcion,
+                Origen        = _origen
+            };
+
+            var solicitud = await SolicitudSvc.CrearAsync(request);
+            solicitud.TipoTramite = Tramites.First(t => t.Id == _tramiteId);
+            await OnSolicitudCreada.InvokeAsync(solicitud);
+        }
+        catch (Exception)
+        {
+            _errorMensaje = "Ocurrió un error al radicar. Intente nuevamente.";
+        }
+        finally
+        {
+            _cargando = false;
+            StateHasChanged();
+        }
+    }
+}

@@ -1,0 +1,208 @@
+@page "/admin/solicitudes/{Id:int}"
+@using VentanillaUnica.Generics.GenericDisplayName
+@using VentanillaUnica.Models
+@using VentanillaUnica.Services.Enums
+@using VentanillaUnica.Services.Solicitud.Enums
+@using VentanillaUnica.Services.Solicitud.Responses
+@rendermode InteractiveServer
+
+<div class="container py-4" style="max-width: 860px;">
+
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <a href="/admin/solicitudes" class="btn btn-sm btn-outline-secondary">← Volver</a>
+        <div>
+            <h5 class="fw-semibold mb-0">Detalle de solicitud</h5>
+            <small class="text-muted">Gestión y seguimiento</small>
+        </div>
+    </div>
+
+    @if (_cargando)
+    {
+        <div class="text-center py-5">
+            <span class="spinner-border text-primary"></span>
+        </div>
+    }
+    else if (_solicitud is not null)
+    {
+        @if (_exitoMensaje is not null)
+        {
+            <div class="alert alert-success py-2 alert-dismissible">
+                <small>@_exitoMensaje</small>
+                <button class="btn-close btn-sm" @onclick="() => _exitoMensaje = null"></button>
+            </div>
+        }
+        @if (_errorMensaje is not null)
+        {
+            <div class="alert alert-danger py-2 alert-dismissible">
+                <small>@_errorMensaje</small>
+                <button class="btn-close btn-sm" @onclick="() => _errorMensaje = null"></button>
+            </div>
+        }
+
+        <div class="row g-4">
+            <div class="col-md-7">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-start mb-3">
+                            <div>
+                                <p class="text-muted mb-0" style="font-size:11px;">RADICADO</p>
+                                <h6 class="fw-bold mb-0" style="letter-spacing:1px;">
+                                    @_solicitud.CodigoSolicitud
+                                </h6>
+                            </div>
+                            <span class="badge @GetBadgeEstado(_solicitud.Estado)">
+                                @_solicitud.Estado.GetDisplayName()
+                            </span>
+                        </div>
+
+                        <div style="font-size:13px;">
+                            <div class="d-flex justify-content-between py-2 border-bottom">
+                                <span class="text-muted">Ciudadano</span>
+                                <span>@_solicitud.CiudadanoNombreCompleto</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-2 border-bottom">
+                                <span class="text-muted">Documento</span>
+                                <span>@_solicitud.CiudadanoNumeroDocumento</span>
+                            </div>
+                            @if (!string.IsNullOrEmpty(_solicitud.CiudadanoEmail))
+                            {
+                                <div class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-muted">Email</span>
+                                    <span>@_solicitud.CiudadanoEmail</span>
+                                </div>
+                            }
+                            @if (!string.IsNullOrEmpty(_solicitud.CiudadanoTelefono))
+                            {
+                                <div class="d-flex justify-content-between py-2 border-bottom">
+                                    <span class="text-muted">Teléfono</span>
+                                    <span>@_solicitud.CiudadanoTelefono</span>
+                                </div>
+                            }
+                            <div class="d-flex justify-content-between py-2 border-bottom">
+                                <span class="text-muted">Trámite</span>
+                                <span>@_solicitud.TramiteNombre</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-2 border-bottom">
+                                <span class="text-muted">Fecha solicitud</span>
+                                <span>@_solicitud.FechaSolicitud.ToString("dd/MM/yyyy")</span>
+                            </div>
+                            <div class="d-flex justify-content-between py-2 @(EsVencida() ? "text-danger" : "")">
+                                <span class="@(EsVencida() ? "text-danger" : "text-muted")">
+                                    Fecha estimada
+                                </span>
+                                <strong>@_solicitud.FechaRespuesta?.ToString("dd/MM/yyyy")</strong>
+                            </div>
+                            @if (!string.IsNullOrEmpty(_solicitud.Observaciones))
+                            {
+                                <div class="pt-2 border-top">
+                                    <span class="text-muted d-block mb-1">Descripción</span>
+                                    <p class="mb-0">@_solicitud.Observaciones</p>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h6 class="fw-semibold mb-3">Gestionar solicitud</h6>
+
+                        <EditForm Model="_form" OnValidSubmit="GuardarAsync">
+                            <DataAnnotationsValidator />
+
+                            <div class="mb-3">
+                                <label class="form-label form-label-sm">Funcionario asignado</label>
+                                <InputSelect class="form-select form-select-sm" @bind-Value="_form.FuncionarioId">
+                                    <option value="">— Sin asignar —</option>
+                                    @foreach (var f in _funcionarios)
+                                    {
+                                        <option value="@f.Id">
+                                            @f.PrimerNombre @f.PrimerApellido
+                                        </option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="() => _form.FuncionarioId" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label form-label-sm">Estado</label>
+                                <InputSelect class="form-select form-select-sm" @bind-Value="_form.Estado">
+                                    @foreach (var estado in Enum.GetValues<EstadoSolicitud>())
+                                    {
+                                        <option value="@estado">@estado.GetDisplayName()</option>
+                                    }
+                                </InputSelect>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label form-label-sm">Observación</label>
+                                <textarea class="form-control form-control-sm"
+                                          @bind="_form.Observacion"
+                                          rows="3"
+                                          maxlength="500"
+                                          placeholder="Opcional..."></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100" disabled="@_guardando">
+                                @if (_guardando)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                    <span>Guardando...</span>
+                                }
+                                else
+                                {
+                                    <span>Guardar cambios</span>
+                                }
+                            </button>
+                        </EditForm>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h6 class="fw-semibold mb-3">Historial de gestiones</h6>
+
+                        @if (_gestiones.Count == 0)
+                        {
+                            <p class="text-muted" style="font-size:13px;">Sin gestiones registradas.</p>
+                        }
+                        else
+                        {
+                            <div class="d-flex flex-column gap-3">
+                                @foreach (var g in _gestiones)
+                                {
+                                    <div class="border-start border-2 ps-3" style="font-size:12px;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <span class="badge @GetBadgeEstado(g.EstadoNuevo)">
+                                                @g.EstadoNuevo.GetDisplayName()
+                                            </span>
+                                            <small class="text-muted">
+                                                @g.FechaGestion.ToString("dd/MM/yyyy HH:mm")
+                                            </small>
+                                        </div>
+                                        @if (g.FuncionarioNuevo is not null)
+                                        {
+                                            <p class="mb-0 mt-1 text-muted">
+                                                Asignado a:
+                                                <strong>
+                                                    @g.FuncionarioNuevo.PrimerNombre
+                                                    @g.FuncionarioNuevo.PrimerApellido
+                                                </strong>
+                                            </p>
+                                        }
+                                        @if (!string.IsNullOrEmpty(g.Observacion))
+                                        {
+                                            <p class="mb-0 mt-1">@g.Observacion</p>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

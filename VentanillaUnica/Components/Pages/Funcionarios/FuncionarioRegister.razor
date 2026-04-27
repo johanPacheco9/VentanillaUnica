@@ -1,0 +1,148 @@
+@using VentanillaUnica.Services.Funcionario
+@using VentanillaUnica.Services.Funcionario.Requests
+@inject FuncionarioManager FuncionarioSvc
+
+<div class="modal fade show d-block" style="background:rgba(0,0,0,.5);" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header border-0 pb-0">
+                <div>
+                    <h6 class="modal-title fw-semibold mb-0">Nuevo funcionario</h6>
+                    <small class="text-muted">Complete los datos</small>
+                </div>
+                <button type="button" class="btn-close" @onclick="() => OnCerrar.InvokeAsync()"></button>
+            </div>
+
+            <div class="modal-body pt-3">
+
+                @if (_errorMensaje is not null)
+                {
+                    <div class="alert alert-danger py-2 alert-dismissible">
+                        <small>@_errorMensaje</small>
+                        <button class="btn-close btn-sm" @onclick="() => _errorMensaje = null"></button>
+                    </div>
+                }
+
+                <EditForm Model="_form" OnValidSubmit="GuardarAsync">
+                    <DataAnnotationsValidator/>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label form-label-sm">
+                                Primer nombre <span class="text-danger">*</span>
+                            </label>
+                            <InputText class="form-control form-control-sm"
+                                       @bind-Value="_form.PrimerNombre"
+                                       placeholder="Juan"/>
+                            <ValidationMessage For="() => _form.PrimerNombre"/>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label form-label-sm">Segundo nombre</label>
+                            <InputText class="form-control form-control-sm"
+                                       @bind-Value="_form.SegundoNombre"
+                                       placeholder="Opcional"/>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label form-label-sm">
+                                Primer apellido <span class="text-danger">*</span>
+                            </label>
+                            <InputText class="form-control form-control-sm"
+                                       @bind-Value="_form.PrimerApellido"
+                                       placeholder="García"/>
+                            <ValidationMessage For="() => _form.PrimerApellido"/>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label form-label-sm">Segundo apellido</label>
+                            <InputText class="form-control form-control-sm"
+                                       @bind-Value="_form.SegundoApellido"
+                                       placeholder="Opcional"/>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label form-label-sm">
+                                Email <span class="text-danger">*</span>
+                            </label>
+                            <InputText class="form-control form-control-sm"
+                                       @bind-Value="_form.Email"
+                                       placeholder="correo@ejemplo.com"/>
+                            <ValidationMessage For="() => _form.Email"/>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label form-label-sm">Teléfono</label>
+                            <InputText class="form-control form-control-sm"
+                                       @bind-Value="_form.Telefono"
+                                       placeholder="3001234567"/>
+                            <ValidationMessage For="() => _form.Telefono"/>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer border-0 px-0 pb-0 mt-4">
+                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                                @onclick="() => OnCerrar.InvokeAsync()">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-sm px-4" disabled="@_guardando">
+                            @if (_guardando)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                <span>Guardando...</span>
+                            }
+                            else
+                            {
+                                <span>Registrar</span>
+                            }
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback OnCerrar { get; set; }
+    [Parameter]
+    public EventCallback OnFuncionarioCreado { get; set; }
+
+    private CreateFuncionarioForm _form = new();
+    private bool _guardando = false;
+    private string? _errorMensaje;
+
+    private async Task GuardarAsync()
+    {
+        _guardando = true;
+        _errorMensaje = null;
+        _errorMensaje = null;
+
+        try
+        {
+            var request = new RegistrarFuncionarioRequest
+            {
+                PrimerNombre = _form.PrimerNombre,
+                SegundoNombre = _form.SegundoNombre,
+                PrimerApellido = _form.PrimerApellido,
+                SegundoApellido = _form.SegundoApellido,
+                Email = _form.Email,
+                Telefono = _form.Telefono
+            };
+
+            await FuncionarioSvc.RegistrarAsync(request);
+            await OnFuncionarioCreado.InvokeAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            _errorMensaje = ex.Message;
+        }
+        catch (Exception)
+        {
+            _errorMensaje = "Ocurrió un error al registrar. Intente nuevamente.";
+        }
+        finally
+        {
+            _guardando = false;
+            StateHasChanged();
+        }
+    }
+
+}

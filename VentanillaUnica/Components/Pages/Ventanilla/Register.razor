@@ -1,0 +1,86 @@
+@page "/ventanilla"
+@using VentanillaUnica.Models
+@using VentanillaUnica.Services.Solicitud.Requests
+@rendermode InteractiveServer
+
+<div class="container py-4" style="max-width: 680px;">
+
+    <div class="mb-4">
+        <h5 class="fw-semibold mb-0">Nueva solicitud</h5>
+        <small class="text-muted">Ventanilla Única — Radicación de trámites</small>
+    </div>
+
+    <div class="d-flex align-items-center mb-4">
+        <StepBadge Numero="1" Etiqueta="Identificar" Estado="@GetEstado(1)" />
+        <div class="flex-grow-1 border-top mx-2"></div>
+        <StepBadge Numero="2" Etiqueta="Trámite" Estado="@GetEstado(2)" />
+        <div class="flex-grow-1 border-top mx-2"></div>
+        <StepBadge Numero="3" Etiqueta="Confirmar" Estado="@GetEstado(3)" />
+    </div>
+
+    @if (_paso == 1)
+    {
+        <BuscadorCiudadano OnCiudadanoConfirmado="OnCiudadanoListo" />
+    }
+
+    @if (_paso == 2)
+    {
+        <RadicarSolicitud Ciudadano="_ciudadano!"
+                          Tramites="_tiposTramite"
+                          OnSolicitudCreada="OnSolicitudCreada"
+                          OnVolver="VolverPaso1" />
+    }
+
+    @if (_paso == 3 && _solicitudCreada != null)
+    {
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4 text-center">
+
+                <div class="bg-success bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+                     style="width:56px;height:56px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" fill="#198754" viewBox="0 0 16 16">
+                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                    </svg>
+                </div>
+
+                <h6 class="fw-semibold mb-0">Solicitud radicada exitosamente</h6>
+                <p class="text-muted mb-3" style="font-size:13px;">Número de radicado</p>
+
+                <div class="bg-light rounded py-2 px-4 d-inline-block mb-4">
+                    <span class="fw-bold" style="font-size:22px;letter-spacing:2px;">
+                        @_solicitudCreada.NumeroRadicado
+                    </span>
+                </div>
+
+                <div class="text-start border rounded p-3" style="font-size:13px;">
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted">Ciudadano</span>
+                        <span>@_ciudadano!.PrimerNombre @_ciudadano.PrimerApellido</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted">Documento</span>
+                        <span>@_ciudadano.NumeroDocumento</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted">Trámite</span>
+                        <span>@_solicitudCreada.TipoTramite.Nombre</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted">Radicado el</span>
+                        <span>@_solicitudCreada.FechaInicio.ToString("dd/MM/yyyy")</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2">
+                        <span class="text-muted">Fecha estimada</span>
+                        <strong class="text-primary">
+                            @_solicitudCreada.FechaEstimadaFin?.ToString("dd/MM/yyyy")
+                        </strong>
+                    </div>
+                </div>
+
+                <button class="btn btn-outline-secondary mt-4" @onclick="NuevaSolicitud">
+                    Nueva solicitud
+                </button>
+            </div>
+        </div>
+    }
+</div>
