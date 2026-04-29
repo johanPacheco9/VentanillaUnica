@@ -36,5 +36,5 @@ public class Funcionario
     public ICollection<Solicitud> Solicitudes { get; set; } = [];
     
     // Propiedad de conveniencia para nombre completo
-    public string NombreCompleto => $"{PrimerNombre} + {PrimerApellido} ".Trim();
+    public string NombreCompleto => $"{PrimerNombre} {PrimerApellido} ".Trim();
 }

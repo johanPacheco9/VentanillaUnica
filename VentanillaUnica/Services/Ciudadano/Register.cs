@@ -25,8 +25,7 @@ public partial class CiudadanoManager
                 NumeroDocumento = request.NumeroIdentificacion,
                 Email = request?.Email,
                 Telefono = request?.Telefono,
-                FechaRegistro = DateTime.UtcNow,
-                MunicipioId = 1
+                FechaRegistro = DateTime.UtcNow
             };
 
             _dbContext.Ciudadanos.Add(ciudadano);

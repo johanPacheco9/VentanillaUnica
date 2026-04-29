@@ -39,7 +39,4 @@ public class Ciudadano
 
     // Relaciones
     public ICollection<Solicitud> Solicitudes { get; set; } = new List<Solicitud>();
-
-    public int MunicipioId { get; set; }
-    public virtual Municipio Municipio { get; set; } = null!;
 }

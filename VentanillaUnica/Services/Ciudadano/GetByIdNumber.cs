@@ -9,7 +9,6 @@ public partial class CiudadanoManager
     public async Task<Models.Ciudadano?> GetByIdNumber(GetCiudadanoByIdRequest request)
     {
         return await _dbContext.Ciudadanos
-            .Include(c => c.Municipio)
             .FirstOrDefaultAsync(c => c.NumeroDocumento == request.IdNumber);
     }
 }

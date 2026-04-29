@@ -6,7 +6,6 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
 {
     // DbSets
     public DbSet<Ciudadano> Ciudadanos { get; set; }
-    public DbSet<Municipio> Municipios { get; set; }
     public DbSet<Solicitud> Solicitudes { get; set; }
     public DbSet<Tramite> Tramites { get; set; }
     public DbSet<Funcionario> Funcionario { get; set; }
