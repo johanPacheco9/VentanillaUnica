@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql("Host=localhost;Database=VentanillaUnica;Username=postgres;Password=1098825894"));
+    options.UseNpgsql("Host=localhost;Database=VentanillaUnica;Username=postgres;Password=adminsql26"));
 builder.Services.AddTransient<SolicitudManager>();
 builder.Services.AddTransient<CiudadanoManager>();
 builder.Services.AddTransient<FuncionarioManager>();
