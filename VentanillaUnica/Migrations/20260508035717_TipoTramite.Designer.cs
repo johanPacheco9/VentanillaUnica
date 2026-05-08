@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using VentanillaUnica.Data;
@@ -11,9 +12,11 @@ using VentanillaUnica.Data;
 namespace VentanillaUnica.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260508035717_TipoTramite")]
+    partial class TipoTramite
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -207,9 +210,6 @@ namespace VentanillaUnica.Migrations
                     b.Property<int?>("Origen")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Placa")
-                        .HasColumnType("text");
-
                     b.Property<int>("TramiteId")
                         .HasColumnType("integer");
 
@@ -347,7 +347,7 @@ namespace VentanillaUnica.Migrations
             modelBuilder.Entity("VentanillaUnica.Models.Tramite", b =>
                 {
                     b.HasOne("VentanillaUnica.Models.TipoTramite", "TipoTramite")
-                        .WithMany("Tramites")
+                        .WithMany()
                         .HasForeignKey("TipoTramiteId");
 
                     b.Navigation("TipoTramite");
@@ -366,11 +366,6 @@ namespace VentanillaUnica.Migrations
             modelBuilder.Entity("VentanillaUnica.Models.Solicitud", b =>
                 {
                     b.Navigation("Gestiones");
-                });
-
-            modelBuilder.Entity("VentanillaUnica.Models.TipoTramite", b =>
-                {
-                    b.Navigation("Tramites");
                 });
 
             modelBuilder.Entity("VentanillaUnica.Models.Tramite", b =>

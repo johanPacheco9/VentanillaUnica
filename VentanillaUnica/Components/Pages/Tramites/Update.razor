@@ -1,0 +1,199 @@
+@page "/tramites/{Id:int}"
+@using Microsoft.EntityFrameworkCore
+@using VentanillaUnica.Data
+@using VentanillaUnica.Models
+@using VentanillaUnica.Services.Tramites
+@using VentanillaUnica.Services.Tramites.Requests
+@using VentanillaUnica.Services.TiposTramites
+@inject TramitesManager TramiteSvc
+@inject TiposTramitesManager TipoTramiteSvc
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+
+<div class="container-fluid py-4">
+    <div class="d-flex align-items-center gap-3 mb-4">
+        <button class="btn btn-outline-secondary btn-sm" @onclick="Volver">←</button>
+        <h5 class="fw-semibold mb-0">Editar Trámite: @_request.Nombre</h5>
+    </div>
+
+    @if (_cargando)
+    {
+        <div class="text-center py-5">
+            <span class="spinner-border text-primary"></span>
+            <p class="mt-2 text-muted">Cargando datos del trámite...</p>
+        </div>
+    }
+    else if (_noEncontrado)
+    {
+        <div class="alert alert-warning shadow-sm">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            No se encontró el trámite con ID <strong>@Id</strong>.
+        </div>
+    }
+    else
+    {
+        <EditForm Model="_request" OnValidSubmit="GuardarAsync">
+            <DataAnnotationsValidator />
+            
+            <div class="row g-4">
+                <div class="col-md-8">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="mb-0 fw-bold">Información General</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Nombre del trámite</label>
+                                <InputText @bind-Value="_request.Nombre" class="form-control" placeholder="Ej: Traspaso de vehículo" />
+                                <ValidationMessage For="@(() => _request.Nombre)" class="text-danger small" />
+                            </div>
+
+                            <div class="mb-0">
+                                <label class="form-label fw-semibold">Descripción</label>
+                                <InputTextArea @bind-Value="_request.Descripcion" class="form-control" rows="4" 
+                                               placeholder="Describa el alcance del trámite..." />
+                                <ValidationMessage For="@(() => _request.Descripcion)" class="text-danger small" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white py-3">
+                            <h6 class="mb-0 fw-bold">Configuración y Reglas</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Categoría / Tipo</label>
+                                <InputSelect @bind-Value="_request.TipoTramiteId" class="form-select">
+                                    <option value="">— Seleccione —</option>
+                                    @foreach (var tipo in _tipos)
+                                    {
+                                        <option value="@tipo.Id">@tipo.Name</option>
+                                    }
+                                </InputSelect>
+                                <ValidationMessage For="@(() => _request.TipoTramiteId)" class="text-danger small" />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Días estimados de respuesta</label>
+                                <div class="input-group">
+                                    <InputNumber @bind-Value="_request.DiasEstimados" class="form-control" />
+                                    <span class="input-group-text">Días</span>
+                                </div>
+                                <ValidationMessage For="@(() => _request.DiasEstimados)" class="text-danger small" />
+                            </div>
+
+                            <hr />
+
+                            <div class="form-check form-switch">
+                                <InputCheckbox @bind-Value="_request.Activo" class="form-check-input" id="swActivo" />
+                                <label class="form-check-label fw-semibold" for="swActivo">Estado Activo</label>
+                                <div class="form-text">Si se desactiva, los ciudadanos no podrán radicar este trámite.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <ValidationSummary />
+                        <button type="submit" class="btn btn-primary shadow-sm" disabled="@_guardando">
+                            @if (_guardando)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                <span>Guardando...</span>
+                            }
+                            else
+                            {
+                                <span><i class="bi bi-save me-1"></i> Guardar Cambios</span>
+                            }
+                        </button>
+                        <button type="button" class="btn btn-light border" @onclick="Volver">Cancelar</button>
+                    </div>
+                    
+                    @if (_errorMensaje is not null)
+                    {
+                        <div class="alert alert-danger mt-3 py-2 small">
+                            @_errorMensaje
+                        </div>
+                    }
+                </div>
+            </div>
+        </EditForm>
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    [Inject]
+    private AppDbContext DbContext { get; set; } = null!;
+
+    private UpdateTramiteRequest _request = new();
+    private List<TipoTramite> _tipos = new();
+    
+    private bool _cargando = true;
+    private bool _guardando = false;
+    private bool _noEncontrado = false;
+    private string? _errorMensaje;
+
+    protected async override Task OnInitializedAsync()
+    {
+        try 
+        {
+            _tipos = await DbContext.TipoTramites.ToListAsync();
+            var tramite = await TramiteSvc.GetByIdAsync(Id);
+        
+            if (tramite is null) {
+                _noEncontrado = true;
+            }
+            else {
+                _request = new UpdateTramiteRequest {
+                    Id = tramite.Id,
+                    Nombre = tramite.Nombre,
+                    Descripcion = tramite.Descripcion,
+                    DiasEstimados = tramite.DiasEstimados,
+                    TipoTramiteId = tramite.TipoTramiteId,
+                    Activo = tramite.Activo
+                };
+            }
+        }
+        catch (Exception ex) {
+            _errorMensaje = ex.Message;
+        }
+        finally {
+            _cargando = false;
+            StateHasChanged(); // <-- Obliga a Blazor a re-evaluar el EditForm
+        }
+    }
+
+    private async Task GuardarAsync()
+    {
+        _guardando = true;
+        _errorMensaje = null;
+
+        try 
+        {
+            var resultado = await TramiteSvc.UpdateTramite(_request);
+            
+            if (resultado != null)
+            {
+                Nav.NavigateTo("/tramites");
+            }
+            else
+            {
+                _errorMensaje = "No se pudieron guardar los cambios. Intente de nuevo.";
+            }
+        }
+        catch (Exception ex)
+        {
+            _errorMensaje = ex.Message;
+        }
+        finally 
+        {
+            _guardando = false;
+        }
+    }
+
+    private void Volver() => Nav.NavigateTo("/tramites");
+}

@@ -36,7 +36,7 @@ public partial class SolicitudManager
                 s.NumeroRadicado,
                 $"{s.Ciudadano.PrimerNombre} {s.Ciudadano.PrimerApellido}",
                 s.Ciudadano.NumeroDocumento,
-                s.TipoTramite.Nombre,
+                s.Tramite.Nombre,
                 s.Estado,
                 s.FechaSolicitud,
                 s.FechaEstimadaFin,

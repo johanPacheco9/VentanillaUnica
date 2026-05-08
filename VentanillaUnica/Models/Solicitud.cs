@@ -2,7 +2,7 @@ using VentanillaUnica.Services.Enums;
 using VentanillaUnica.Services.Solicitud.Enums;
 namespace VentanillaUnica.Models;
 
-public class Solicitud
+public sealed class Solicitud : EntityWithTraceability
 {
     public int Id { get; set; }
     public string NumeroRadicado { get; set; } = string.Empty;
@@ -10,9 +10,9 @@ public class Solicitud
     public int CiudadanoId { get; set; }
     public Ciudadano Ciudadano { get; set; } = null!;
 
-    public int TipoTramiteId { get; set; }
+    public int TramiteId { get; set; }
     
-    public Tramite TipoTramite { get; set; } = null!;
+    public Tramite Tramite { get; set; } = null!;
     
     public EstadoSolicitud Estado { get; set; } = EstadoSolicitud.Pendiente;
     
@@ -31,9 +31,11 @@ public class Solicitud
     public string? Observaciones { get; set; }
     
     public Origen? Origen { get; set; }
+
+    public string? Placa { get; set; }
     //Relaciones
     public int? FuncionarioId { get; set; }
     public Funcionario? Funcionario { get; set; }
     
-    public virtual ICollection<GestionSolicitud> Gestiones { get; set; } = new List<GestionSolicitud>();
+    public ICollection<GestionSolicitud> Gestiones { get; set; } = new List<GestionSolicitud>();
 }

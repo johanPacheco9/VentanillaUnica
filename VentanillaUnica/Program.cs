@@ -5,6 +5,8 @@ using VentanillaUnica.Services.Ciudadano;
 using VentanillaUnica.Services.Funcionario;
 using VentanillaUnica.Services.Gestion;
 using VentanillaUnica.Services.Solicitud;
+using VentanillaUnica.Services.TiposTramites;
+using VentanillaUnica.Services.Tramites;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,11 +14,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql("Host=localhost;Database=VentanillaUnica;Username=postgres;Password=adminsql26"));
+    options.UseNpgsql("Host=localhost;Database=VentanillaUnica;Username=postgres;Password=1098825894"));
 builder.Services.AddTransient<SolicitudManager>();
 builder.Services.AddTransient<CiudadanoManager>();
 builder.Services.AddTransient<FuncionarioManager>();
 builder.Services.AddTransient<GestionManager>();
+builder.Services.AddTransient<TramitesManager>();
+builder.Services.AddTransient <TiposTramitesManager>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

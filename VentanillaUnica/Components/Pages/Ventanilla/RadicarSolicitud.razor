@@ -10,9 +10,11 @@
     <div class="card-body p-4">
 
         <div class="d-flex align-items-center gap-2 mb-4">
-            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;">
+            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center"
+                 style="width:36px;height:36px;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="white" viewBox="0 0 16 16">
-                    <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5L9.5 0zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                    <path
+                        d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5L9.5 0zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
                 </svg>
             </div>
             <div class="flex-grow-1">
@@ -62,7 +64,9 @@
             <label class="form-label form-label-sm">
                 Tipo de trámite <span class="text-danger">*</span>
             </label>
-            <select class="form-select form-select-sm" @bind="_tramiteId">
+            <select class="form-select form-select-sm" 
+                    value="@_tramiteId" 
+                    @onchange="OnTramiteChanged">
                 <option value="0">— Seleccione un trámite —</option>
                 @foreach (var t in Tramites)
                 {
@@ -79,9 +83,25 @@
                         <span> — @tramite.Descripcion</span>
                     }
                 </small>
+                
+                @if (tramite.TipoTramite?.RequierePlaca == true)
+                {
+                    <div class="mt-3 p-3 bg-light rounded border-start border-primary border-4">
+                        <label class="form-label form-label-sm fw-bold">
+                            <i class="bi bi-car-front"></i> Placa del vehículo <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" 
+                               class="form-control form-control-sm text-uppercase" 
+                               @bind="_placa" 
+                               placeholder="Ej: ABC123" 
+                               maxlength="6" />
+                        <small class="text-muted">Este trámite requiere identificar un vehículo.</small>
+                    </div>
+                }
             }
         </div>
-
+       
+       
         <div class="d-flex justify-content-between">
             <button class="btn btn-outline-secondary" @onclick="() => OnVolver.InvokeAsync()">← Volver</button>
             <button class="btn btn-primary px-4"
@@ -100,46 +120,3 @@
         </div>
     </div>
 </div>
-
-@code {
-    [Parameter, EditorRequired] public Ciudadano       Ciudadano { get; set; } = null!;
-    [Parameter, EditorRequired] public List<Tramite>   Tramites  { get; set; } = [];
-    [Parameter] public EventCallback<Solicitud>        OnSolicitudCreada { get; set; }
-    [Parameter] public EventCallback OnVolver { get; set; }
-
-    private int     _tramiteId    = 0;
-    private bool    _cargando     = false;
-    private string? _errorMensaje;
-    private string? _descripcion;
-    private Origen _origen = Origen.Ventanilla;
-    
-    private async Task RadicarAsync()
-    {
-        _cargando     = true;
-        _errorMensaje = null;
-
-        try
-        {
-            var request = new CreateSolicitudRequest
-            {
-                CiudadanoId   = Ciudadano.Id,
-                TipoTramiteId = _tramiteId,
-                Observaciones   = _descripcion,
-                Origen        = _origen
-            };
-
-            var solicitud = await SolicitudSvc.CrearAsync(request);
-            solicitud.TipoTramite = Tramites.First(t => t.Id == _tramiteId);
-            await OnSolicitudCreada.InvokeAsync(solicitud);
-        }
-        catch (Exception)
-        {
-            _errorMensaje = "Ocurrió un error al radicar. Intente nuevamente.";
-        }
-        finally
-        {
-            _cargando = false;
-            StateHasChanged();
-        }
-    }
-}

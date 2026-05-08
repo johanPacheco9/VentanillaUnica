@@ -19,10 +19,12 @@ public partial class Register
     protected async override Task OnInitializedAsync()
     {
         _tiposTramite = await DbContext.Tramites
+            .Include(t => t.TipoTramite)
             .Where(t => t.Activo)
             .OrderBy(t => t.Nombre)
             .ToListAsync();
     }
+
 
     private string GetEstado(int numeroPaso) =>
         numeroPaso < _paso  ? "done"   :

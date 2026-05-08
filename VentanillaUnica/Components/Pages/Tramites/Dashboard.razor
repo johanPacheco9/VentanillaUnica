@@ -1,0 +1,39 @@
+@page "/tramites"
+@using VentanillaUnica.Components.Pages.Tramites.TiposTramite
+@rendermode InteractiveServer
+
+<div class="container-fluid w-100">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h5 class="fw-semibold mb-0">Trámites</h5>
+            <small class="text-muted">Gestión del catálogo de trámites</small>
+        </div>
+    </div>
+
+    <ul class="nav nav-tabs mb-4">
+        <li class="nav-item">
+            <button class="nav-link @(_tab == 0 ? "active" : "")" @onclick="() => _tab = 0">
+                Catálogo
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link @(_tab == 1 ? "active" : "")" @onclick="() => _tab = 1">
+                Tipos de trámite
+            </button>
+        </li>
+    </ul>
+
+    @if (_tab == 0)
+    {
+        <ListadoTramites />
+    }
+    else
+    {
+        <ListadoTiposTramite />
+    }
+</div>
+
+@code {
+    private int _tab = 0;
+}

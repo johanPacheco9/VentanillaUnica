@@ -10,6 +10,7 @@ public partial class AppDbContext(DbContextOptions<AppDbContext> options) : DbCo
     public DbSet<Tramite> Tramites { get; set; }
     public DbSet<Funcionario> Funcionario { get; set; }
     public DbSet<GestionSolicitud> GestionesSolicitud { get; set; }
+    public DbSet<TipoTramite> TipoTramites { get; set; }
 }
 
 

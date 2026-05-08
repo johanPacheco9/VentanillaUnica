@@ -1,0 +1,157 @@
+@using VentanillaUnica.Models
+@using VentanillaUnica.Services.TiposTramites
+@using VentanillaUnica.Services.TiposTramites.Requests
+@inject TiposTramitesManager TiposTramitesSvc
+@rendermode InteractiveServer
+
+<div class="modal fade show d-block" style="background:rgba(0,0,0,.5);" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+
+            <div class="modal-header border-0 pb-0">
+                <div>
+                    <h6 class="modal-title fw-semibold mb-0">
+                        @(EsEdicion ? "Editar tipo de trámite" : "Nuevo tipo de trámite")
+                    </h6>
+                    <small class="text-muted">Complete los datos</small>
+                </div>
+                <button type="button" class="btn-close"
+                        @onclick="() => OnCerrar.InvokeAsync()"></button>
+            </div>
+
+            <div class="modal-body pt-3">
+
+                @if (_errorMensaje is not null)
+                {
+                    <div class="alert alert-danger py-2 alert-dismissible">
+                        <small>@_errorMensaje</small>
+                        <button class="btn-close btn-sm"
+                                @onclick="() => _errorMensaje = null"></button>
+                    </div>
+                }
+
+                <EditForm Model="_form" OnValidSubmit="GuardarAsync">
+                    <DataAnnotationsValidator />
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label form-label-sm">
+                                Nombre <span class="text-danger">*</span>
+                            </label>
+                            <InputText class="form-control form-control-sm"
+                                       @bind-Value="_form.Name"
+                                       placeholder="Ej: Licencias" />
+                            <ValidationMessage For="() => _form.Name" />
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label form-label-sm">Descripción</label>
+                            <InputTextArea class="form-control form-control-sm"
+                                           @bind-Value="_form.Description"
+                                           rows="3"
+                                           placeholder="Descripción opcional..." />
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <InputCheckbox class="form-check-input"
+                                               @bind-Value="_form.RequierePlaca" />
+                                <label class="form-check-label form-label-sm">
+                                    Requiere placa
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer border-0 px-0 pb-0 mt-4">
+                        <button type="button" class="btn btn-outline-secondary btn-sm"
+                                @onclick="() => OnCerrar.InvokeAsync()">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-sm px-4"
+                                disabled="@_guardando">
+                            @if (_guardando)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                <span>Guardando...</span>
+                            }
+                            else
+                            {
+                                <span>@(EsEdicion ? "Guardar cambios" : "Crear")</span>
+                            }
+                        </button>
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public TipoTramite?      TipoEditar  { get; set; }
+    [Parameter] public EventCallback     OnCerrar    { get; set; }
+    [Parameter] public EventCallback     OnGuardado  { get; set; }
+
+    private TipoTramiteForm _form         = new();
+    private bool            _guardando    = false;
+    private string?         _errorMensaje;
+
+    private bool EsEdicion => TipoEditar is not null;
+
+    protected override void OnParametersSet()
+    {
+        if (TipoEditar is not null)
+        {
+            _form = new TipoTramiteForm
+            {
+                Name          = TipoEditar.Name,
+                Description   = TipoEditar.Description,
+                RequierePlaca = TipoEditar.RequierePlaca ?? false
+            };
+        }
+    }
+
+    private async Task GuardarAsync()
+    {
+        _guardando    = true;
+        _errorMensaje = null;
+
+        try
+        {
+            if (EsEdicion)
+            {
+                var request = new UpdateTipoTramiteRequest
+                {
+                    Id            = TipoEditar!.Id,
+                    Name          = _form.Name,
+                    Description   = _form.Description,
+                    RequierePlaca = _form.RequierePlaca
+                };
+
+                var ok = await TiposTramitesSvc.UpdateTipoTramite(request);
+                if (!ok) _errorMensaje = "No se pudo actualizar. Intente nuevamente.";
+                else await OnGuardado.InvokeAsync();
+            }
+            else
+            {
+                var request = new CreateTipoTramiteRequest
+                {
+                    Name          = _form.Name,
+                    Description   = _form.Description,
+                    RequierePlaca = _form.RequierePlaca
+                };
+
+                var creado = await TiposTramitesSvc.CreateTipoTramite(request);
+                if (creado is null) _errorMensaje = "No se pudo crear. Intente nuevamente.";
+                else await OnGuardado.InvokeAsync();
+            }
+        }
+        catch (Exception)
+        {
+            _errorMensaje = "Ocurrió un error inesperado. Intente nuevamente.";
+        }
+        finally
+        {
+            _guardando = false;
+            StateHasChanged();
+        }
+    }
+}

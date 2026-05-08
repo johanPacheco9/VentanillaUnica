@@ -1,0 +1,133 @@
+@rendermode InteractiveServer
+
+<div class="container-fluid w-100">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h5 class="fw-semibold mb-0">Trámites</h5>
+            <small class="text-muted">Catálogo de trámites disponibles</small>
+        </div>
+        <button class="btn btn-primary btn-sm" @onclick="@NavigateCreatePage">
+            + Nuevo trámite
+        </button>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body py-3">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label form-label-sm">Estado</label>
+                    <select class="form-select form-select-sm"
+                            @bind="_estadoSeleccionado"
+                            @bind:after="FiltrarAsync">
+                        <option value="">Todos</option>
+                        <option value="true">Activos</option>
+                        <option value="false">Inactivos</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label form-label-sm">Tipo</label>
+                    <select class="form-select form-select-sm"
+                            @bind="_filtros.TipoTramiteId"
+                            @bind:after="FiltrarAsync">
+                        <option value="">Todos</option>
+                        @foreach (var t in _tiposTramite)
+                        {
+                            <option value="@t.Id">@t.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-2 ms-auto">
+                    <button class="btn btn-outline-secondary btn-sm w-100" @onclick="FiltrarAsync">
+                        Actualizar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (_errorMensaje is not null)
+    {
+        <div class="alert alert-danger py-2"><small>@_errorMensaje</small></div>
+    }
+
+    @if (_cargando)
+    {
+        <div class="text-center py-5">
+            <span class="spinner-border text-primary"></span>
+            <p class="text-muted mt-2" style="font-size:13px;">Cargando trámites...</p>
+        </div>
+    }
+    else if (_tramites.Count == 0)
+    {
+        <div class="text-center py-5 text-muted">
+            <p class="mb-0">No se encontraron trámites.</p>
+        </div>
+    }
+    else
+    {
+        <div class="card border-0 shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" style="font-size:13px;">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Días estimados</th>
+                            <th>Estado</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var t in _tramites)
+                        {
+                            <tr class="@(t.Activo ? "" : "table-secondary")">
+                                <td>
+                                    <p class="fw-semibold mb-0">@t.Nombre</p>
+                                    @if (!string.IsNullOrEmpty(t.Descripcion))
+                                    {
+                                        <small class="text-muted">@t.Descripcion</small>
+                                    }
+                                </td>
+                                <td>@(t.TipoTramite?.Name ?? "—")</td>
+                                <td>
+                                    @(t.DiasEstimados.HasValue
+                                        ? $"{t.DiasEstimados} días hábiles"
+                                        : "—")
+                                </td>
+                                <td>
+                                    <span class="badge @(t.Activo ? "bg-success" : "bg-secondary")">
+                                        @(t.Activo ? "Activo" : "Inactivo")
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/tramites/@t.Id"
+                                       class="btn btn-sm btn-outline-primary">
+                                        Ver
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <small class="text-muted">Mostrando @_tramites.Count resultados</small>
+            <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-outline-secondary"
+                        @onclick="PaginaAnterior"
+                        disabled="@(_filtros.Pagina == 1)">
+                    ← Anterior
+                </button>
+                <span class="btn btn-sm btn-light disabled">@_filtros.Pagina</span>
+                <button class="btn btn-sm btn-outline-secondary"
+                        @onclick="PaginaSiguiente"
+                        disabled="@(_tramites.Count < _filtros.TamañoPagina)">
+                    Siguiente →
+                </button>
+            </div>
+        </div>
+    }
+</div>

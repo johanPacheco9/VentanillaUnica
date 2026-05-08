@@ -9,7 +9,7 @@ public record SolicitudDetailDto(
     EstadoSolicitud Estado,
     DateTime? FechaRespuesta,
     string? Observaciones,
-    
+    string? Placa,
     // Información del Ciudadano
     int CiudadanoId,
     string CiudadanoNombreCompleto,
@@ -25,5 +25,5 @@ public record SolicitudDetailDto(
     int TramiteId,
     string TramiteNombre,
     string TramiteDescripcion,
-    int TramiteDiasEstimados
+    int? TramiteDiasEstimados
 );

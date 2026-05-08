@@ -26,6 +26,7 @@ public partial class SolicitudManager
                     Estado: s.Estado,
                     FechaRespuesta: s.FechaEstimadaFin,
                     Observaciones: s.Observaciones,
+                    s.Placa ?? null,
                     CiudadanoId: s.Ciudadano.Id,
                     CiudadanoNombreCompleto: s.Ciudadano.PrimerNombre + " " + s.Ciudadano.PrimerApellido,
                     CiudadanoNumeroDocumento: s.Ciudadano.NumeroDocumento,
@@ -34,10 +35,10 @@ public partial class SolicitudManager
                     FuncionarioId: s.Funcionario != null ? s.Funcionario.Id : (int?)null,
                     FuncionarioNombreCompleto: s.Funcionario != null ? 
                         s.Funcionario.PrimerNombre + " " + s.Funcionario.PrimerApellido : null,
-                    TramiteId: s.TipoTramite.Id,
-                    TramiteNombre: s.TipoTramite.Nombre,
-                    TramiteDescripcion: s.TipoTramite.Descripcion ?? string.Empty,
-                    TramiteDiasEstimados: s.TipoTramite.DiasEstimados
+                    TramiteId: s.Tramite.Id,
+                    TramiteNombre: s.Tramite.Nombre,
+                    TramiteDescripcion: s.Tramite.Descripcion ?? string.Empty,
+                    TramiteDiasEstimados: s.Tramite.DiasEstimados ?? null
                 ))
                 .FirstOrDefaultAsync();
             if (solicitud == null)

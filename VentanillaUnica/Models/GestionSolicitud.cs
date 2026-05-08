@@ -20,6 +20,5 @@ public class GestionSolicitud
     public string? Observacion { get; set; }
     public DateTime FechaGestion { get; set; } = DateTime.UtcNow;
 
-    // Quién hizo el cambio — cuando tengas auth
     public string? RealizadoPor { get; set; }
 }

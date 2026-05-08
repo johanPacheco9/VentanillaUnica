@@ -1,0 +1,88 @@
+@page "/tramites/nuevo"
+@rendermode InteractiveServer
+
+<div class="container py-4" style="max-width: 600px;">
+
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <a href="/tramites" class="btn btn-sm btn-outline-secondary">← Volver</a>
+        <div>
+            <h5 class="fw-semibold mb-0">Nuevo trámite</h5>
+            <small class="text-muted">Complete los datos del trámite</small>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+
+            @if (_errorMensaje is not null)
+            {
+                <div class="alert alert-danger py-2 alert-dismissible">
+                    <small>@_errorMensaje</small>
+                    <button class="btn-close btn-sm" @onclick="() => _errorMensaje = null"></button>
+                </div>
+            }
+
+            <EditForm Model="_form" OnValidSubmit="GuardarAsync">
+                <DataAnnotationsValidator />
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label form-label-sm">
+                            Nombre <span class="text-danger">*</span>
+                        </label>
+                        <InputText class="form-control form-control-sm"
+                                   @bind-Value="_form.Nombre"
+                                   placeholder="Ej: Certificado de Residencia" />
+                        <ValidationMessage For="() => _form.Nombre" />
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label form-label-sm">Descripción</label>
+                        <InputTextArea class="form-control form-control-sm"
+                                       @bind-Value="_form.Descripcion"
+                                       rows="3"
+                                       placeholder="Descripción opcional del trámite..." />
+                        <ValidationMessage For="() => _form.Descripcion" />
+                    </div>
+
+                    <div class="col-6">
+                        <label class="form-label form-label-sm">Días estimados</label>
+                        <InputNumber class="form-control form-control-sm"
+                                     @bind-Value="_form.DiasEstimados"
+                                     placeholder="Ej: 5" />
+                        <ValidationMessage For="() => _form.DiasEstimados" />
+                        <small class="text-muted">Días hábiles para resolver el trámite</small>
+                    </div>
+
+                    <div class="col-6">
+                        <label class="form-label form-label-sm">Tipo de trámite</label>
+                        <InputSelect class="form-select form-select-sm" @bind-Value="_form.TipoTramiteId">
+                            <option value="">— Sin categoría —</option>
+                            @foreach (var t in _tiposTramite)
+                            {
+                                <option value="@t.Id">@t.Name</option>
+                            }
+                        </InputSelect>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="d-flex justify-content-between">
+                    <a href="/tramites" class="btn btn-outline-secondary">← Volver</a>
+                    <button type="submit" class="btn btn-primary px-4" disabled="@_guardando">
+                        @if (_guardando)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                            <span>Guardando...</span>
+                        }
+                        else
+                        {
+                            <span>Crear trámite</span>
+                        }
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>

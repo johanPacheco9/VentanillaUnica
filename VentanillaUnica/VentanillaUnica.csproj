@@ -18,6 +18,11 @@
 
     <ItemGroup>
       <Folder Include="Services\Gestion\Responses\" />
+      <Folder Include="Services\Tramites\Responses\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Components\Pages\Reports\Dashboard.razor" />
     </ItemGroup>
 
 </Project>
