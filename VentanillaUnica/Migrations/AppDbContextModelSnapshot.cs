@@ -30,12 +30,24 @@ namespace VentanillaUnica.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CreadoPor")
+                        .HasColumnType("text");
+
                     b.Property<string>("Email")
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("FechaRegistro")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ModificadoPor")
+                        .HasColumnType("text");
 
                     b.Property<string>("NumeroDocumento")
                         .IsRequired()
@@ -83,10 +95,20 @@ namespace VentanillaUnica.Migrations
                     b.Property<bool>("Activo")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("CreadoPor")
+                        .HasColumnType("text");
+
                     b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ModificadoPor")
+                        .HasColumnType("text");
 
                     b.Property<string>("PrimerApellido")
                         .IsRequired()
@@ -123,13 +145,22 @@ namespace VentanillaUnica.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CreadoPor")
+                        .HasColumnType("text");
+
                     b.Property<int>("EstadoAnterior")
                         .HasColumnType("integer");
 
                     b.Property<int>("EstadoNuevo")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<DateTime>("FechaGestion")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("FechaModificacion")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<int?>("FuncionarioAnteriorId")
@@ -137,6 +168,9 @@ namespace VentanillaUnica.Migrations
 
                     b.Property<int?>("FuncionarioNuevoId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("ModificadoPor")
+                        .HasColumnType("text");
 
                     b.Property<string>("Observacion")
                         .HasColumnType("text");
@@ -300,6 +334,59 @@ namespace VentanillaUnica.Migrations
                     b.HasIndex("TipoTramiteId");
 
                     b.ToTable("Tramites");
+                });
+
+            modelBuilder.Entity("VentanillaUnica.Models.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CreadoPor")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("IdNumber")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ModificadoPor")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("VentanillaUnica.Models.GestionSolicitud", b =>

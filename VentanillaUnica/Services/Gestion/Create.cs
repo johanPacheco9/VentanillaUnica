@@ -24,7 +24,8 @@ public partial class GestionManager
             FuncionarioNuevoId = request.NuevoFuncionarioAsignado,
             Observacion = request.Observacion,
             FechaGestion = DateTime.UtcNow,
-            RealizadoPor = request.RealizadoPor
+            CreadoPor = request.RealizadoPor,
+            FechaCreacion = DateTime.UtcNow
         };
 
         solicitud.Estado = request.NuevoEstado;

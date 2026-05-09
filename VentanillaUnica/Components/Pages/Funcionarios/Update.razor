@@ -1,0 +1,153 @@
+@page "/admin/funcionarios/{Id:int}"
+@using VentanillaUnica.Models
+@using VentanillaUnica.Services.Funcionarios
+@using VentanillaUnica.Services.Funcionarios.Requests
+@using Microsoft.AspNetCore.Components.Authorization
+@inject FuncionarioManager FuncionarioSvc
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+@attribute [Authorize(Roles = "Admin")]
+@rendermode InteractiveServer
+
+<div class="container py-4">
+    <div class="d-flex align-items-center mb-4">
+        <button class="btn btn-link text-decoration-none p-0 me-3"
+                @onclick='() => Nav.NavigateTo("/admin/funcionarios")'>
+            <i class="bi bi-arrow-left fs-4"></i>
+        </button>
+        <h3 class="fw-bold mb-0">Detalle del Funcionario</h3>
+    </div>
+
+    @if (_request == null)
+    {
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="text-muted mt-2">Cargando datos...</p>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <EditForm Model="_request" OnValidSubmit="HandleUpdate">
+                    <DataAnnotationsValidator />
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Primer Nombre</label>
+                            <InputText @bind-Value="_request.PrimerNombre" class="form-control" />
+                            <ValidationMessage For="@(() => _request.PrimerNombre)" class="text-danger small" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Segundo Nombre</label>
+                            <InputText @bind-Value="_request.SegundoNombre" class="form-control" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Primer Apellido</label>
+                            <InputText @bind-Value="_request.PrimerApellido" class="form-control" />
+                            <ValidationMessage For="@(() => _request.PrimerApellido)" class="text-danger small" />
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Segundo Apellido</label>
+                            <InputText @bind-Value="_request.SegundoApellido" class="form-control" />
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label fw-semibold">Email</label>
+                            <InputText @bind-Value="_request.Email" class="form-control" />
+                            <ValidationMessage For="@(() => _request.Email)" class="text-danger small" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Teléfono</label>
+                            <InputText @bind-Value="_request.Telefono" class="form-control" />
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check form-switch mt-2">
+                                <InputCheckbox @bind-Value="_request.Activo" class="form-check-input" role="switch" id="estadoCheck" />
+                                <label class="form-check-label fw-semibold" for="estadoCheck">
+                                    @( _request.Activo ? "Funcionario Activo" : "Funcionario Inactivo" )
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-5">
+                        <button type="button" class="btn btn-outline-secondary" @onclick='() => Nav.NavigateTo("/admin/funcionarios")'>
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary shadow-sm" disabled="@_cargando">
+                            @if (_cargando)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            Guardar Cambios
+                        </button>
+                    </div>
+                </EditForm>
+
+                @if (_mensaje != null)
+                {
+                    <div class="alert @(_esExito ? "alert-success" : "alert-danger") mt-3 mb-0">
+                        @_mensaje
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private UpdateFuncionarioRequest? _request;
+    private bool _cargando = false;
+    private string? _mensaje;
+    private bool _esExito;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var f = await FuncionarioSvc.GetById(Id);
+            _request = new UpdateFuncionarioRequest
+            {
+                Id = f.Id,
+                PrimerNombre = f.PrimerNombre,
+                SegundoNombre = f.SegundoNombre,
+                PrimerApellido = f.PrimerApellido,
+                SegundoApellido = f.SegundoApellido,
+                Email = f.Email ?? "",
+                Telefono = f.Telefono,
+                Activo = f.Activo
+            };
+        }
+        catch (Exception ex)
+        {
+            _mensaje = "Error al cargar: " + ex.Message;
+        }
+    }
+
+    private async Task HandleUpdate()
+    {
+        _cargando = true;
+        _mensaje = null;
+
+        try
+        {
+            var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+            _request!.ModificadoPor = auth.User.Identity?.Name ?? "Sistema";
+
+            await FuncionarioSvc.Update(_request);
+            _esExito = true;
+            _mensaje = "Funcionario actualizado correctamente.";
+            
+            await Task.Delay(1500);
+            Nav.NavigateTo("/admin/funcionarios");
+        }
+        catch (Exception ex)
+        {
+            _esExito = false;
+            _mensaje = ex.Message;
+        }
+        finally { _cargando = false; }
+    }
+}

@@ -6,4 +6,5 @@ public class CreateTramiteRequest
     public string? Descripcion { get; set; }
     public int? DiasEstimados { get; set; }
     public int? TipoTramiteId { get; set; }
+    public string CreadoPor { get; set; } = null!;
 }

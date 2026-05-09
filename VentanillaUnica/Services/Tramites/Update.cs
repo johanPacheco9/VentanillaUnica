@@ -25,7 +25,7 @@ public partial class TramitesManager
             tramite.TipoTramiteId = request.TipoTramiteId;
             tramite.Activo = request.Activo;
             tramite.FechaModificacion = DateTime.UtcNow;
-            tramite.ModificadoPor = "system";
+            tramite.ModificadoPor = request.ModificadoPor;
             
             await _context.SaveChangesAsync();
 

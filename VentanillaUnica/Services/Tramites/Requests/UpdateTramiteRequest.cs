@@ -8,4 +8,6 @@ public class UpdateTramiteRequest
     public int? DiasEstimados { get; set; }
     public int? TipoTramiteId { get; set; }
     public bool Activo { get; set; }
+    
+    public string? ModificadoPor { get; set; }
 }

@@ -1,0 +1,93 @@
+@using Microsoft.AspNetCore.Components.Authorization
+
+<nav class="d-flex flex-column p-0 bg-white border-end"
+     style="width:240px; min-height:100vh;">
+
+    <!-- Logo -->
+    <div class="px-4 py-3 border-bottom">
+        <img src="/Images/logo.png"
+             alt="Dataset Software"
+             style="height:50px; width:100%; object-fit:contain; object-position:left;">
+        <p class="mb-0 text-muted mt-1" style="font-size:10px; letter-spacing:0.05em;">
+            VENTANILLA ÚNICA
+        </p>
+    </div>
+
+    <!-- Nav -->
+    <div class="flex-grow-1 px-3 py-3">
+
+        <p class="text-uppercase text-muted mb-2 px-2"
+           style="font-size:10px;">
+            Principal
+        </p>
+
+        <NavLink class="nav-item-link"
+                 href="/ventanilla"
+                 Match="NavLinkMatch.All">
+            <span>Ventanilla</span>
+        </NavLink>
+
+        <p class="text-uppercase text-muted mb-2 mt-3 px-2"
+           style="font-size:10px;">
+            Administración
+        </p>
+
+        <NavLink class="nav-item-link" href="/Solicitudes">
+            <span>Solicitudes</span>
+        </NavLink>
+
+        <NavLink class="nav-item-link" href="/admin/funcionarios">
+            <span>Funcionarios</span>
+        </NavLink>
+
+        <NavLink class="nav-item-link" href="/tramites">
+            <span>Trámites</span>
+        </NavLink>
+
+        <AuthorizeView Roles="Admin">
+            <NavLink class="nav-item-link" href="/admin/usuarios">
+                <span>Usuarios</span>
+            </NavLink>
+        </AuthorizeView>
+
+        <NavLink class="nav-item-link" href="/admin/reportes">
+            <span>Reportes</span>
+        </NavLink>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="px-4 py-3 border-top">
+        <p class="mb-0 text-muted" style="font-size:11px;">
+            Dataset Software © @DateTime.Now.Year
+        </p>
+    </div>
+
+</nav>
+
+<style>
+
+    .nav-item-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        color: #6c757d;
+        text-decoration: none;
+        font-size: 13px;
+        margin-bottom: 2px;
+    }
+
+    .nav-item-link:hover {
+        background: #f8f9fa;
+        color: #212529;
+    }
+
+    .nav-item-link.active {
+        background: #e7f1ff;
+        color: #0d6efd;
+        font-weight: 500;
+    }
+
+</style>

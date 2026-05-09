@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-namespace VentanillaUnica.Services.Funcionario.Requests;
+namespace VentanillaUnica.Services.Funcionarios.Requests;
 
 public class RegistrarFuncionarioRequest
 {
@@ -16,13 +16,14 @@ public class RegistrarFuncionarioRequest
 
     [MaxLength(50)]
     public string? SegundoApellido { get; set; }
-
-    [Required(ErrorMessage = "El email es requerido.")]
+    
     [EmailAddress(ErrorMessage = "Formato de email inválido.")]
     [MaxLength(100)]
-    public string Email { get; set; } = null!;
+    public string? Email { get; set; }
 
     [Phone(ErrorMessage = "Formato de teléfono inválido.")]
     [MaxLength(20)]
     public string? Telefono { get; set; }
+    
+    public string? CreadoPor { get; set; }
 }

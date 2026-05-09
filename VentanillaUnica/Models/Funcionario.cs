@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace VentanillaUnica.Models;
 
-public class Funcionario
+public class Funcionario : EntityWithTraceability
 {
     [Key]
     public int Id { get; set; }
@@ -21,8 +21,6 @@ public class Funcionario
     [MaxLength(50, ErrorMessage = "El segundo apellido no puede exceder los 50 caracteres")]
     public string? SegundoApellido { get; set; } = string.Empty;
     
-    [Required(ErrorMessage = "El email es obligatorio")]
-    [MaxLength(100, ErrorMessage = "El email no puede exceder los 100 caracteres")]
     [EmailAddress(ErrorMessage = "Formato de email inválido")]
     public string? Email { get; set; } = string.Empty;
     

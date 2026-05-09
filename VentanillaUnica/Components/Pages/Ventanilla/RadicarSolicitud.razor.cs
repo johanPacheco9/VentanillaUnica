@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using VentanillaUnica.Models;
 using VentanillaUnica.Services.Solicitud.Enums;
 using VentanillaUnica.Services.Solicitud.Requests;
@@ -10,6 +11,8 @@ public partial class RadicarSolicitud
     [Parameter, EditorRequired] public List<Tramite>   Tramites  { get; set; } = [];
     [Parameter] public EventCallback<Models.Solicitud>        OnSolicitudCreada { get; set; }
     [Parameter] public EventCallback OnVolver { get; set; }
+    
+    [Inject] public AuthenticationStateProvider AuthStateProvider  { get; set; } = null!;
 
     private int     _tramiteId    = 0;
     private bool    _cargando     = false;
@@ -25,20 +28,24 @@ public partial class RadicarSolicitud
 
         try
         {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var username = authState.User.Identity?.Name;
+            
             var request = new CreateSolicitudRequest
             {
                 CiudadanoId   = Ciudadano.Id,
                 TipoTramiteId = _tramiteId,
                 Observaciones = _descripcion,
                 Origen        = _origen,
-                Placa         =  _placa
+                Placa         =  _placa,
+                CreadoPor = username ?? "Sistema"
             };
 
             var solicitud = await SolicitudSvc.CrearAsync(request);
             solicitud.Tramite = Tramites.First(t => t.Id == _tramiteId);
             await OnSolicitudCreada.InvokeAsync(solicitud);
         }
-        catch (Exception ex) // <-- Capturamos la variable 'ex'
+        catch (Exception ex)
         {
             _errorMensaje = ex.Message ?? "Ocurrió un error al radicar. Intente nuevamente.";
         }

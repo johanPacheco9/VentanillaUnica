@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using VentanillaUnica.Models;
-using VentanillaUnica.Services.Funcionario.Requests;
+using VentanillaUnica.Services.Funcionarios.Requests;
 
-namespace VentanillaUnica.Services.Funcionario;
+namespace VentanillaUnica.Services.Funcionarios;
 
 public partial class FuncionarioManager
 {
-    public async Task<Models.Funcionario> RegistrarAsync(RegistrarFuncionarioRequest request)
+    public async Task<Funcionario> RegistrarAsync(RegistrarFuncionarioRequest request)
     {
         var existe = await _dbContext.Funcionario
             .AnyAsync(f => f.Email == request.Email);
@@ -15,7 +15,7 @@ public partial class FuncionarioManager
             throw new InvalidOperationException(
                 $"Ya existe un funcionario con el email {request.Email}.");
 
-        var funcionario = new Models.Funcionario
+        var funcionario = new Funcionario
         {
             PrimerNombre    = request.PrimerNombre,
             SegundoNombre   = request.SegundoNombre,
@@ -23,7 +23,9 @@ public partial class FuncionarioManager
             SegundoApellido = request.SegundoApellido,
             Email           = request.Email,
             Telefono        = request.Telefono,
-            Activo          = true
+            Activo          = true,
+            CreadoPor = request.CreadoPor,
+            FechaCreacion = DateTime.UtcNow
         };
 
         _dbContext.Funcionario.Add(funcionario);

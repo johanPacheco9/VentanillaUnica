@@ -1,0 +1,141 @@
+@page "/registro"
+@using Microsoft.AspNetCore.Components.Authorization
+@using VentanillaUnica.Services.Users
+@using VentanillaUnica.Services.Users.Requests
+@using VentanillaUnica.Models
+@inject UserManager UserSvc
+@inject NavigationManager Nav
+@attribute [AllowAnonymous]
+@layout Layout.EmptyLayout
+@rendermode InteractiveServer
+@inject AuthenticationStateProvider AuthStateProvider
+
+<div class="register-container d-flex align-items-center justify-content-center p-4">
+    <div class="card shadow-lg border-0" style="max-width: 600px; width: 100%; border-radius: 1rem;">
+        <div class="card-body p-4 p-md-5">
+            <div class="text-center mb-4">
+                <h3 class="fw-bold">Crear Cuenta</h3>
+                <p class="text-muted">Completa los datos para registrarte en el sistema</p>
+            </div>
+
+            <EditForm Model="_request" OnValidSubmit="HandleRegister">
+                <DataAnnotationsValidator />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Identificación</label>
+                        <InputText @bind-Value="_request.IdNumber" class="form-control" placeholder="1098..." />
+                        <ValidationMessage For="@(() => _request.IdNumber)" class="text-danger small" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Nombre de Usuario</label>
+                        <InputText @bind-Value="_request.UserName" class="form-control" placeholder="juan.perez" />
+                        <ValidationMessage For="@(() => _request.UserName)" class="text-danger small" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Nombre</label>
+                        <InputText @bind-Value="_request.FirstName" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Apellido</label>
+                        <InputText @bind-Value="_request.LastName" class="form-control" />
+                    </div>
+
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-semibold">Correo Electrónico</label>
+                        <InputText @bind-Value="_request.Email" class="form-control" placeholder="correo@ejemplo.com" />
+                        <ValidationMessage For="@(() => _request.Email)" class="text-danger small" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Contraseña</label>
+                        <InputText @bind-Value="_request.Password" type="password" class="form-control" />
+                        <ValidationMessage For="@(() => _request.Password)" class="text-danger small" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Rol</label>
+                        <InputSelect @bind-Value="_request.Role" class="form-select">
+                            <option value="">Selecciona...</option>
+                            <option value="Admin">Administrador</option>
+                            <option value="Funcionario">Funcionario</option>
+                        </InputSelect>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg shadow-sm" disabled="@_isProcessing">
+                        @if (_isProcessing)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                            <span>Registrando...</span>
+                        }
+                        else
+                        {
+                            <span>Registrarse</span>
+                        }
+                    </button>
+                    <a href="/" class="btn btn-link text-decoration-none">¿Ya tienes cuenta? Inicia sesión</a>
+                </div>
+
+                @if (!string.IsNullOrEmpty(_message))
+                {
+                    <div class="alert @(_isSuccess ? "alert-success" : "alert-danger") mt-3 small text-center border-0">
+                        @_message
+                    </div>
+                }
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+<style>
+    .register-container {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+</style>
+
+@code {
+    private CreateUserRequest _request = new();
+    private bool _isProcessing = false;
+    private string? _message;
+    private bool _isSuccess = false;
+    
+
+    private async Task HandleRegister()
+    {
+        _isProcessing = true;
+        _message = null;
+
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var currentUser = authState.User;
+            
+            // El nombre del admin que está logueado
+            string adminName = currentUser.Identity?.Name ?? "Sistema";
+            _request.CreadoPor = adminName;
+            
+            await UserSvc.Create(_request);
+            _isSuccess = true;
+            _message = "Usuario creado con éxito. Redirigiendo al login...";
+            
+            // Esperamos 2 segundos para que el usuario vea el éxito y redirigimos
+            await Task.Delay(2000);
+            Nav.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            _isSuccess = false;
+            _message = ex.Message;
+        }
+        finally
+        {
+            _isProcessing = false;
+        }
+    }
+}

@@ -1,6 +1,10 @@
-@using VentanillaUnica.Services.Funcionario
-@using VentanillaUnica.Services.Funcionario.Requests
+@using Microsoft.AspNetCore.Components.Authorization
+@using VentanillaUnica.Services.Funcionarios
+@using VentanillaUnica.Services.Funcionarios.Requests
+
 @inject FuncionarioManager FuncionarioSvc
+@inject AuthenticationStateProvider AuthStateProvider
+
 
 <div class="modal fade show d-block" style="background:rgba(0,0,0,.5);" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -117,6 +121,8 @@
 
         try
         {
+            var auth = await AuthStateProvider.GetAuthenticationStateAsync();
+            var username = auth.User.Identity?.Name ?? "Sistema";
             var request = new RegistrarFuncionarioRequest
             {
                 PrimerNombre = _form.PrimerNombre,
@@ -124,7 +130,8 @@
                 PrimerApellido = _form.PrimerApellido,
                 SegundoApellido = _form.SegundoApellido,
                 Email = _form.Email,
-                Telefono = _form.Telefono
+                Telefono = _form.Telefono,
+                CreadoPor = username??"sistema"
             };
 
             await FuncionarioSvc.RegistrarAsync(request);

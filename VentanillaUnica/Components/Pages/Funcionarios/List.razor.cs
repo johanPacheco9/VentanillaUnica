@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
-using VentanillaUnica.Services.Funcionario;
-using VentanillaUnica.Services.Funcionario.Requests;
+using VentanillaUnica.Services.Funcionarios;
+using VentanillaUnica.Services.Funcionarios.Requests;
 namespace VentanillaUnica.Components.Pages.Funcionarios;
 
 public partial class List 

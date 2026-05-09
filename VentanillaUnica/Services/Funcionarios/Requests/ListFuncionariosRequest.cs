@@ -1,4 +1,4 @@
-namespace VentanillaUnica.Services.Funcionario.Requests;
+namespace VentanillaUnica.Services.Funcionarios.Requests;
 
 public class ListFuncionariosRequest
 {

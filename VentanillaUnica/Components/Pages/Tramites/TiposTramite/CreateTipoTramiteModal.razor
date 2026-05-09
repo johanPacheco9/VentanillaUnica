@@ -1,3 +1,4 @@
+@using Microsoft.AspNetCore.Components.Authorization
 @using VentanillaUnica.Models
 @using VentanillaUnica.Services.TiposTramites
 @using VentanillaUnica.Services.TiposTramites.Requests
@@ -89,7 +90,8 @@
     [Parameter] public TipoTramite?      TipoEditar  { get; set; }
     [Parameter] public EventCallback     OnCerrar    { get; set; }
     [Parameter] public EventCallback     OnGuardado  { get; set; }
-
+    [Inject] public AuthenticationStateProvider AuthStateProvider  { get; set; } = null!;
+    
     private TipoTramiteForm _form         = new();
     private bool            _guardando    = false;
     private string?         _errorMensaje;
@@ -116,6 +118,8 @@
 
         try
         {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var username = authState.User.Identity?.Name;
             if (EsEdicion)
             {
                 var request = new UpdateTipoTramiteRequest
@@ -123,7 +127,8 @@
                     Id            = TipoEditar!.Id,
                     Name          = _form.Name,
                     Description   = _form.Description,
-                    RequierePlaca = _form.RequierePlaca
+                    RequierePlaca = _form.RequierePlaca,
+                    ModificadoPor = username ?? "Sistema"
                 };
 
                 var ok = await TiposTramitesSvc.UpdateTipoTramite(request);
@@ -136,7 +141,8 @@
                 {
                     Name          = _form.Name,
                     Description   = _form.Description,
-                    RequierePlaca = _form.RequierePlaca
+                    RequierePlaca = _form.RequierePlaca,
+                    CreadoPor = username ?? "Sistema"
                 };
 
                 var creado = await TiposTramitesSvc.CreateTipoTramite(request);

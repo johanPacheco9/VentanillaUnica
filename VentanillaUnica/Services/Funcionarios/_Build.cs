@@ -1,5 +1,5 @@
 using VentanillaUnica.Data;
-namespace VentanillaUnica.Services.Funcionario;
+namespace VentanillaUnica.Services.Funcionarios;
 public partial class FuncionarioManager(ILogger<FuncionarioManager> logger, IConfiguration configuration, AppDbContext dbContext)
 {
     private readonly ILogger<FuncionarioManager> _logger = logger;

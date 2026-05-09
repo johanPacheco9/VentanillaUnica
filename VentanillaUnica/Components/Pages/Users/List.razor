@@ -1,0 +1,202 @@
+@page "/admin/usuarios"
+@using VentanillaUnica.Services.Users
+@using VentanillaUnica.Services.Users.Requests
+@using VentanillaUnica.Models
+@attribute [Authorize(Roles = "Admin")]
+@inject UserManager UserSvc
+@layout Layout.MainLayout
+@rendermode  InteractiveServer
+@inject NavigationManager Nav
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold text-dark mb-1">Gestión de Usuarios</h3>
+            <p class="text-muted small mb-0">Visualiza y administra los perfiles de la plataforma.</p>
+        </div>
+        <a href="/registro" class="btn btn-primary px-4 shadow-sm">
+            <i class="bi bi-person-plus-fill me-2"></i>Nuevo Usuario
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-7">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0 bg-light" 
+                               placeholder="Buscar por usuario, email o identificación..."
+                               @bind="_request.SearchTerm" @bind:event="oninput" @onkeyup="LoadUsers" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select bg-light" @bind="SelectedRole">
+                        <option value="">Todos los roles</option>
+                        <option value="Admin">Administrador</option>
+                        <option value="Funcionario">Funcionario</option>
+                        <option value="Ciudadano">Ciudadano</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-outline-secondary w-100" @onclick="ResetFilters">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>Limpiar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light text-muted">
+                    <tr style="font-size: 13px;">
+                        <th class="ps-4">USUARIO / NOMBRE</th>
+                        <th>IDENTIFICACIÓN</th>
+                        <th>EMAIL / TELÉFONO</th>
+                        <th>ROL</th>
+                        <th>REGISTRADO</th>
+                        <th class="text-end pe-4">ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (_users == null)
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status"></div>
+                                <div class="mt-2 text-muted">Cargando usuarios...</div>
+                            </td>
+                        </tr>
+                    }
+                    else if (!_users.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <i class="bi bi-people text-muted" style="font-size: 2rem;"></i>
+                                <p class="mt-2 text-muted">No se encontraron usuarios con estos criterios.</p>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        @foreach (var user in _users)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-circle me-3">
+                                            @user.FirstName[0]@(user.LastName?[0])
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark">@user.FirstName @user.LastName</div>
+                                            <div class="text-muted small">@@@user.Username</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-muted">@user.IdNumber</td>
+                                <td>
+                                    <div class="small">@user.Email</div>
+                                    <div class="text-muted x-small">@user.PhoneNumber</div>
+                                </td>
+                                <td>
+                                    <span class="badge @GetBadgeClass(user.Role)">
+                                        @user.Role
+                                    </span>
+                                </td>
+                                <td class="text-muted small">
+                                    @user.FechaCreacion.ToString("dd/MM/yyyy")
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group shadow-sm">
+                                        @* Navegación directa usando el ID del usuario *@
+                                        <button type="button" class="btn btn-white btn-sm border" title="Editar" 
+                                                @onclick="@(() => Nav.NavigateTo($"/admin/usuarios/editar/{user.Id}"))">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen" viewBox="0 0 16 16">
+                                                <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001m-.644.766a.5.5 0 0 0-.707 0L1.95 11.756l-.764 3.057 3.057-.764L14.44 3.854a.5.5 0 0 0 0-.708z"/>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .avatar-circle {
+        width: 38px;
+        height: 38px;
+        background-color: #e9ecef;
+        color: #0d6efd;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 13px;
+        border: 1px solid #dee2e6;
+    }
+
+    .x-small {
+        font-size: 11px;
+    }
+
+    .badge-admin { background-color: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+    .badge-func { background-color: #cff4fc; color: #055160; border: 1px solid #b6effb; }
+    .badge-user { background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+</style>
+
+@code {
+    private ListUserRequest _request = new();
+    private List<User>? _users;
+
+    protected async override Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        _users = await UserSvc.GetUsersAsync(_request);
+        StateHasChanged(); 
+    }
+    private async Task ResetFilters()
+    {
+        _request = new ListUserRequest();
+        await LoadUsers();
+    }
+
+    private string GetBadgeClass(string role) => role switch
+    {
+        "Admin" => "badge-admin",
+        "Funcionario" => "badge-func",
+        _ => "badge-user"
+    };
+    private string? SelectedRole 
+    {
+        get => _request.RoleFilter;
+        set 
+        {
+            if (_request.RoleFilter != value)
+            {
+                _request.RoleFilter = value;
+                _request.Page = 1; // REGLA DE ORO: Si filtras, vuelves a la página 1
+            
+                // Forzamos la carga asíncrona correctamente
+                InvokeAsync(async () => 
+                {
+                    await LoadUsers();
+                    StateHasChanged(); 
+                });
+            }
+        }
+    }
+}

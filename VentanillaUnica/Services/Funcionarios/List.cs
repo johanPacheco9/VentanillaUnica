@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using VentanillaUnica.Services.Funcionario.Requests;
-using VentanillaUnica.Models;
+using VentanillaUnica.Services.Funcionarios.Requests;
 
-namespace VentanillaUnica.Services.Funcionario;
+namespace VentanillaUnica.Services.Funcionarios;
 
 public partial class FuncionarioManager
 {

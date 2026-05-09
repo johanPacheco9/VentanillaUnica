@@ -17,6 +17,8 @@ public partial class TiposTramitesManager
             tipoTramite.Name          = request.Name;
             tipoTramite.Description   = request.Description;
             tipoTramite.RequierePlaca = request.RequierePlaca;
+            tipoTramite.FechaModificacion = DateTime.UtcNow;
+            tipoTramite.ModificadoPor = request.ModificadoPor;
 
             await _context.SaveChangesAsync();
             return true;

@@ -13,4 +13,6 @@ public class UpdateTipoTramiteRequest
     public string? Description { get; set; }
 
     public bool RequierePlaca { get; set; }
+    
+    public string? ModificadoPor { get; set; }
 }

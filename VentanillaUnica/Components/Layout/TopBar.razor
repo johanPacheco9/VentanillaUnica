@@ -1,0 +1,45 @@
+@inject NavigationManager Nav
+@rendermode InteractiveServer
+
+<header class="bg-white border-bottom px-4 d-flex align-items-center justify-content-between"
+        style="height:56px;">
+
+    <div>
+        <h6 class="mb-0 fw-semibold text-dark"
+            style="font-size:14px;">
+            Sistema de Gestión — Ventanilla Única
+        </h6>
+    </div>
+
+    <div class="d-flex align-items-center gap-3">
+
+        <button class="btn btn-outline-danger btn-sm"
+                @onclick="Logout">
+
+            <i class="bi bi-box-arrow-right me-1"></i>
+            Cerrar sesión
+
+        </button>
+
+        <span class="badge bg-success-subtle text-success border border-success-subtle"
+              style="font-size:11px;">
+            En línea
+        </span>
+
+        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center text-white"
+             style="width:32px;height:32px;font-size:12px;font-weight:600;">
+            AD
+        </div>
+
+    </div>
+
+</header>
+
+@code {
+
+    private void Logout()
+    {
+        Nav.NavigateTo("/api/auth/logout", true);
+    }
+
+}

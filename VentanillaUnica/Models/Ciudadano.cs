@@ -3,7 +3,7 @@ using VentanillaUnica.Services.Enums;
 
 namespace VentanillaUnica.Models;
 
-public class Ciudadano
+public class Ciudadano : EntityWithTraceability
 {
     public int Id { get; set; }
 

@@ -14,8 +14,8 @@ public partial class TramitesManager
                 Descripcion = request.Descripcion,
                 TipoTramiteId =  request.TipoTramiteId,
                 DiasEstimados = request.DiasEstimados,
-                CreadoPor = "System",
-                FechaCreacion = DateTime.UtcNow
+                CreadoPor = request.CreadoPor,
+                FechaCreacion = DateTime.UtcNow,
             };
             _context.Tramites.Add(tramite);
             await _context.SaveChangesAsync();

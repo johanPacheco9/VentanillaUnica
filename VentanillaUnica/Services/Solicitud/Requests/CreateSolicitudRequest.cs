@@ -17,4 +17,6 @@ public class CreateSolicitudRequest
     public Origen Origen { get; set; }
     
     public string? Placa { get; set; }
+    
+    public string CreadoPor { get; set; }
 }

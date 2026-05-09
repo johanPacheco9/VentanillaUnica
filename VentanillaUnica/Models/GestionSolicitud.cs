@@ -3,7 +3,7 @@ using VentanillaUnica.Services.Solicitud.Enums;
 namespace VentanillaUnica.Models;
 
 // Models/GestionSolicitud.cs
-public class GestionSolicitud
+public class GestionSolicitud : EntityWithTraceability
 {
     public int Id { get; set; }
 

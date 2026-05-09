@@ -17,7 +17,7 @@ public class CreateFuncionarioForm
     [MaxLength(50)]
     public string? SegundoApellido { get; set; }
 
-    [Required(ErrorMessage = "El email es requerido.")]
+    
     [EmailAddress(ErrorMessage = "Formato de email inválido.")]
     [MaxLength(100)]
     public string Email { get; set; } = null!;

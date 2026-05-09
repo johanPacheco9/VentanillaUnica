@@ -1,8 +1,8 @@
 namespace VentanillaUnica.Models;
 
-public class User
+public class User : EntityWithTraceability
 {
-    public int UserId { get; set; }
+    public int Id { get; set; }
     public string Username { get; set; } = null!;
     public string Password { get; set; } = null!;
     public string? Email { get; set; }

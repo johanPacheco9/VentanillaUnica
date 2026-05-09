@@ -1,6 +1,38 @@
-﻿<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
-    <Found Context="routeData">
-        <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)"/>
-        <FocusOnNavigate RouteData="routeData" Selector="h1"/>
-    </Found>
-</Router>
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@inject NavigationManager Nav
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="typeof(Program).Assembly">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+                <NotAuthorized>
+                    @if (context.User.Identity?.IsAuthenticated != true)
+                    {
+                        Nav.NavigateTo("login");
+                    }
+                    else
+                    {
+                        <div class="container py-5 text-center">
+                            <div class="alert alert-warning shadow-sm">
+                                <i class="bi bi-exclamation-triangle fs-1"></i>
+                                <h5 class="mt-3">Acceso Restringido</h5>
+                                <p>Tu cuenta no tiene los permisos necesarios.</p>
+                                <a href="/" class="btn btn-outline-primary">Volver al inicio</a>
+                            </div>
+                        </div>
+                    }
+                </NotAuthorized>
+                <Authorizing>
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2">Validando identidad...</p>
+                    </div>
+                </Authorizing>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="routeData" Selector="h1"/>
+        </Found>
+        <NotFound>
+            <NotFoundPage />
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>

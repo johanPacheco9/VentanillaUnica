@@ -13,7 +13,7 @@ public partial class TiposTramitesManager
                 Name = request.Name,
                 Description = request.Description,
                 RequierePlaca = request.RequierePlaca,
-                CreadoPor = "System",
+                CreadoPor = request.CreadoPor,
                 FechaCreacion =  DateTime.UtcNow
             };
             _context.TipoTramites.Add(tipoTramite);

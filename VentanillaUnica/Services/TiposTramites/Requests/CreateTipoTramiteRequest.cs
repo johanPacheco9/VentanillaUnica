@@ -10,4 +10,6 @@ public class CreateTipoTramiteRequest
     public string? Description { get; set; }
 
     public bool RequierePlaca { get; set; }
+    
+    public string? CreadoPor {get; set;}
 }

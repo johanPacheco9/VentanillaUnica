@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
 using VentanillaUnica.Data;
 using VentanillaUnica.Models;
@@ -19,7 +20,8 @@ public partial class Update
     [Inject] public GestionManager  GestionSolicitudSvc { get; set; } = null!;
     [Inject] public AppDbContext      DbContext     { get; set; } = null!;
     [Inject] public NavigationManager Nav          { get; set; } = null!;
-
+    [Inject] public AuthenticationStateProvider AuthStateProvider  { get; set; } = null!;
+    
     [Parameter] public int Id { get; set; }
 
     private SolicitudDetailDto?    _solicitud;
@@ -79,13 +81,16 @@ public partial class Update
 
         try
         {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var username = authState.User.Identity?.Name;
+            
             var request = new CreateGestionRequest
             {
                 SolicitudId = Id,
                 NuevoEstado = _form.Estado,
                 NuevoFuncionarioAsignado = _form.FuncionarioId,
                 Observacion = _form.Observacion,
-                RealizadoPor = "usuario_actual" 
+                RealizadoPor = username ?? "sistema" 
             };
 
             await GestionSolicitudSvc.Create(request);
