@@ -33,6 +33,7 @@ public partial class SolicitudManager
             FechaEstimadaFin = SumarDiasHabiles(DateTime.UtcNow, tramite.DiasEstimados ?? 0),
             Origen = request.Origen,
             Placa = request.Placa,
+            NumeroFolio = request.NumeroFolio ?? "",
             CreadoPor = request.CreadoPor,
             FechaCreacion =  DateTime.UtcNow
         };

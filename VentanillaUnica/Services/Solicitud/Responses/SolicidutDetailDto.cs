@@ -10,6 +10,7 @@ public record SolicitudDetailDto(
     DateTime? FechaRespuesta,
     string? Observaciones,
     string? Placa,
+    string? NumeroFolio,
     // Información del Ciudadano
     int CiudadanoId,
     string CiudadanoNombreCompleto,

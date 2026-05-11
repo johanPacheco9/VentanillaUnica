@@ -33,6 +33,8 @@ public sealed class Solicitud : EntityWithTraceability
     public Origen? Origen { get; set; }
 
     public string? Placa { get; set; }
+    
+    public string? NumeroFolio { get; set; }
     //Relaciones
     public int? FuncionarioId { get; set; }
     public Funcionario? Funcionario { get; set; }

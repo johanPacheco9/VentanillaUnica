@@ -18,5 +18,6 @@ public class CreateSolicitudRequest
     
     public string? Placa { get; set; }
     
+    public string? NumeroFolio { get; set; }
     public string CreadoPor { get; set; }
 }

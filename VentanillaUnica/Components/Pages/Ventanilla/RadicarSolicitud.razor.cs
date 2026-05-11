@@ -31,6 +31,7 @@ public partial class RadicarSolicitud
     private string? _descripcion;
     private Origen  _origen       = Origen.Ventanilla;
     private string? _placa;
+    private string _numeroFolio = string.Empty;
     private int     _filtroTipoId = -1;
 
     protected override void OnParametersSet()
@@ -88,6 +89,7 @@ public partial class RadicarSolicitud
                 Observaciones = _descripcion,
                 Origen        = _origen,
                 Placa         = _placa,
+                NumeroFolio = _numeroFolio,
                 CreadoPor     = username ?? "Sistema"
             };
 

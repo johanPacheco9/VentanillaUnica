@@ -5,7 +5,8 @@
     <div class="card-body p-4">
         @* Encabezado con info del Ciudadano *@
         <div class="d-flex align-items-center gap-2 mb-4">
-            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width:36px;height:36px;">
+            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center"
+                 style="width:36px;height:36px;">
                 <i class="bi bi-file-earmark-text text-white"></i>
             </div>
             <div class="flex-grow-1">
@@ -13,7 +14,8 @@
                     <div>
                         <h6 class="mb-0 fw-semibold">Seleccionar trámite</h6>
                         <small class="text-muted">
-                            <strong>@Ciudadano.PrimerNombre @Ciudadano.PrimerApellido</strong> — @Ciudadano.NumeroDocumento
+                            <strong>@Ciudadano.PrimerNombre @Ciudadano.PrimerApellido</strong>
+                            — @Ciudadano.NumeroDocumento
                         </small>
                     </div>
                     <div style="min-width:160px;">
@@ -39,8 +41,20 @@
 
         <div class="mb-3">
             <label class="form-label form-label-sm">Descripción / motivo</label>
-            <textarea class="form-control form-control-sm" @bind="_descripcion" rows="3" maxlength="500" placeholder="Motivo de la solicitud..."></textarea>
+            <textarea class="form-control form-control-sm" @bind="_descripcion" rows="3" maxlength="500"
+                      placeholder="Motivo de la solicitud..."></textarea>
             <small class="text-muted">@(_descripcion?.Length ?? 0) / 500</small>
+        </div>
+        <div class="mb-3">
+            <label class="form-label form-label-sm fw-bold">Número de folio</label>
+            <input type="text"
+                   class="form-control form-control-sm"
+                   @bind="_numeroFolio"
+                   @oninput="@((ChangeEventArgs e) => _numeroFolio = new string(e.Value?.ToString()?.Where(char.IsDigit).ToArray()))"
+                   inputmode="numeric"
+                   pattern="[0-0]*"
+                   maxlength="12"
+                   placeholder="Solo números"/>
         </div>
 
         <div class="mb-4">
@@ -80,7 +94,8 @@
                     {
                         <div class="mt-3 p-3 bg-light rounded border-start border-primary border-4">
                             <label class="form-label form-label-sm fw-bold">Placa del vehículo *</label>
-                            <input type="text" class="form-control form-control-sm text-uppercase" @bind="_placa" maxlength="6" />
+                            <input type="text" class="form-control form-control-sm text-uppercase" @bind="_placa"
+                                   maxlength="6"/>
                         </div>
                     }
                 }
@@ -90,7 +105,10 @@
         <div class="d-flex justify-content-between mt-4">
             <button class="btn btn-outline-secondary" @onclick="OnVolver">← Volver</button>
             <button class="btn btn-primary px-4" @onclick="RadicarAsync" disabled="@(_tramiteId == 0 || _cargando)">
-                @if (_cargando) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                @if (_cargando)
+                {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                }
                 Radicar solicitud →
             </button>
         </div>
