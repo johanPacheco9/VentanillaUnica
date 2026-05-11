@@ -45,6 +45,7 @@ public partial class ListadoTramites
         try
         {
             _tramites = await TramitesSvc.GetTramites(_filtros);
+            StateHasChanged();
         }
         catch (Exception)
         {

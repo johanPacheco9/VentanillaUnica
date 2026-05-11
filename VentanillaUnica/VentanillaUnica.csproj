@@ -20,7 +20,6 @@
 
     <ItemGroup>
       <Folder Include="Services\Gestion\Responses\" />
-      <Folder Include="Services\Tramites\Responses\" />
     </ItemGroup>
 
     <ItemGroup>

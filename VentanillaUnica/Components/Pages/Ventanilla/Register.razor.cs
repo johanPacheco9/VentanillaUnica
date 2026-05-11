@@ -2,27 +2,37 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.EntityFrameworkCore;
 using VentanillaUnica.Data;
 using VentanillaUnica.Models;
+using VentanillaUnica.Services.TiposTramites;
+using VentanillaUnica.Services.TiposTramites.Responses;
+using VentanillaUnica.Services.Tramites;
+using VentanillaUnica.Services.Tramites.Requests;
+using VentanillaUnica.Services.Tramites.Responses;
 
 namespace VentanillaUnica.Components.Pages.Ventanilla;
 
 public partial class Register
 {
     [Inject] public AppDbContext DbContext { get; set; } = null!;
-
+    [Inject]
+    public TramitesManager TramitesManager { get; set; } = null!;
+    [Inject] public TiposTramitesManager TiposManager { get; set; } = null!;
     private int    _paso     = 1;
     private void VolverPaso1() => _paso = 1;
 
     private Ciudadano?        _ciudadano;
     private Models.Solicitud?        _solicitudCreada;
-    private List<Tramite>     _tiposTramite = [];
+    private List<TramitesByTipoDetailDto> _catalogoTramites = [];
+    private List<TiposTramiteResponseDto> _categorias = [];
 
     protected async override Task OnInitializedAsync()
     {
-        _tiposTramite = await DbContext.Tramites
-            .Include(t => t.TipoTramite)
-            .Where(t => t.Activo)
-            .OrderBy(t => t.Nombre)
-            .ToListAsync();
+        var TipoTramitesRequest = new GetTramitesByTipoRequest
+        {
+            TipoTramiteId = 0
+        };
+       
+        _categorias = await TiposManager.List();
+        _catalogoTramites = await TramitesManager.GetByTipoTramites(TipoTramitesRequest);
     }
 
 
