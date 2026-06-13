@@ -5,10 +5,13 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <BlazorDisableThrowNavigationException>true</BlazorDisableThrowNavigationException>
+        <UserSecretsId>63bee15e-6f50-4768-af00-c73993130eb6</UserSecretsId>
     </PropertyGroup>
 
     <ItemGroup>
       <PackageReference Include="BCrypt" Version="1.0.0" />
+      <PackageReference Include="ExcelDataReader" Version="3.9.0-develop00574" />
+      <PackageReference Include="ExcelDataReader.DataSet" Version="3.9.0-develop00574" />
       <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.7" />
       <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.7" />
       <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.7">
@@ -20,6 +23,7 @@
 
     <ItemGroup>
       <Folder Include="Services\Gestion\Responses\" />
+      <Folder Include="Services\Importacion\Responses\" />
     </ItemGroup>
 
     <ItemGroup>

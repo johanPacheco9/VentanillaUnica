@@ -15,8 +15,8 @@ public class CreateSolicitudRequest
     
     [Required (ErrorMessage = "El origen de la solicitud es requerido")]
     public Origen Origen { get; set; }
-    
-    public string? Placa { get; set; }
+
+    public List<string>? Placas{ get; set; } = [];
     
     public string? NumeroFolio { get; set; }
     public string CreadoPor { get; set; }

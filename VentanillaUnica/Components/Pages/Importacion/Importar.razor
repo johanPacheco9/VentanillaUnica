@@ -1,0 +1,206 @@
+@page "/importar"
+@using System.IO
+@using ExcelDataReader
+@using System.Data
+@using VentanillaUnica.Services.Importacion
+@using VentanillaUnica.Services.Importacion.Requests
+
+@inject ImportacionService ImportacionSvc
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+<h3>Importar Historial desde Excel</h3>
+
+<div class="card shadow-sm border-0 mt-3">
+    <div class="card-body p-4">
+        
+        @* ZONA DRAG & DROP *@
+        <div class="drag-drop-zone @(_isDragging ? "dragging" : "")" 
+             @ondragenter="HandleDragEnter" 
+             @ondragleave="HandleDragLeave"
+             @ondragover:preventDefault
+             @ondrop:preventDefault>
+            
+            <InputFile OnChange="OnInputFileChange" 
+                       accept=".xlsx, .xls" 
+                       class="file-input-hidden" 
+                       id="excelFileDrop" />
+            
+            <label for="excelFileDrop" class="w-100 h-100 d-flex flex-column align-items-center justify-content-center m-0 py-5" style="cursor: pointer;">
+                <i class="bi bi-cloud-arrow-up text-primary mb-2" style="font-size: 3rem;"></i>
+                <h5 class="fw-semibold mb-1">Arrastra tu archivo de Excel aquí</h5>
+                <p class="text-muted small mb-0">O haz clic para explorar tus archivos (.xlsx, .xls)</p>
+            </label>
+        </div>
+
+        @* ESTADOS DE CARGA Y MENSAJES *@
+        @if (_procesando)
+        {
+            <div class="d-flex align-items-center gap-2 mt-3 text-primary">
+                <div class="spinner-border spinner-border-sm" role="status"></div>
+                <span>Procesando y limpiando registros del Excel...</span>
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(_mensajeExito))
+        {
+            <div class="alert alert-success mt-3 py-2">
+                <i class="bi bi-check-circle-fill me-2"></i> @_mensajeExito
+            </div>
+        }
+
+        @if (!string.IsNullOrEmpty(_mensajeError))
+        {
+            <div class="alert alert-danger mt-3 py-2">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> @_mensajeError
+            </div>
+        }
+    </div>
+</div>
+
+@* ESTILOS CSS LOCALES PARA EL EFECTO DRAG *@
+<style>
+    .drag-drop-zone {
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        transition: all 0.2s ease-in-out;
+        position: relative;
+    }
+
+    .drag-drop-zone.dragging {
+        border-color: #0d6efd;
+        background-color: #e9ecef;
+        transform: scale(1.01);
+    }
+
+    .file-input-hidden {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        opacity: 0;
+        cursor: pointer;
+        z-index: 2;
+    }
+</style>
+
+@code {
+    private bool _isDragging = false;
+    private bool _procesando = false;
+    private string? _mensajeExito;
+    private string? _mensajeError;
+
+    private void HandleDragEnter() => _isDragging = true;
+    private void HandleDragLeave() => _isDragging = false;
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        _isDragging = false;
+        _procesando = true;
+        _mensajeExito = null;
+        _mensajeError = null;
+
+        try
+        {
+            var archivo = e.File;
+            if (archivo == null) return;
+
+            var extension = Path.GetExtension(archivo.Name).ToLower();
+            if (extension != ".xlsx" && extension != ".xls")
+            {
+                _mensajeError = "Formato no válido. Por favor sube solo archivos .xlsx o .xls";
+                _procesando = false;
+                return;
+            }
+
+            using var stream = archivo.OpenReadStream(maxAllowedSize: 1024 * 1024 * 5);
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+
+            var filasRaw = LeerExcelDesdeStream(memoryStream);
+
+            if (!filasRaw.Any())
+            {
+                _mensajeError = "El archivo de Excel está vacío o no contiene el formato esperado.";
+                _procesando = false;
+                return;
+            }
+
+            await ImportacionSvc.ImportarDesdeExcelAsync(filasRaw);
+
+            _mensajeExito = $"¡Importación exitosa! Se procesaron {filasRaw.Count} registros del historial.";
+        }
+        catch (Exception ex)
+        {
+            _mensajeError = $"Error al procesar el archivo: {ex.Message}";
+        }
+        finally
+        {
+            _procesando = false;
+        }
+    }
+
+    // Busca una columna ignorando mayúsculas y espacios extra en el header
+    private static string ObtenerColumna(DataRow fila, string nombreColumna, int indiceDefault)
+    {
+        var columna = fila.Table.Columns
+            .Cast<DataColumn>()
+            .FirstOrDefault(c => c.ColumnName.Trim()
+                .Equals(nombreColumna.Trim(), StringComparison.OrdinalIgnoreCase));
+
+        if (columna != null)
+            return fila[columna]?.ToString() ?? "";
+
+        return fila.Table.Columns.Count > indiceDefault
+            ? fila[indiceDefault]?.ToString() ?? ""
+            : "";
+    }
+
+    private List<RegistroExcelRaw> LeerExcelDesdeStream(Stream stream)
+    {
+        var lista = new List<RegistroExcelRaw>();
+
+        System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
+        using var reader = ExcelReaderFactory.CreateReader(stream);
+
+        var result = reader.AsDataSet(new ExcelDataSetConfiguration()
+        {
+            ConfigureDataTable = (_) => new ExcelDataTableConfiguration()
+            {
+                UseHeaderRow = true
+            }
+        });
+
+        if (result.Tables.Count == 0) return lista;
+
+        DataTable tabla = result.Tables[0];
+        
+        Console.WriteLine(">>> Headers detectados: " +
+            string.Join(" | ", tabla.Columns.Cast<DataColumn>().Select(c => $"'{c.ColumnName}'")));
+
+        foreach (DataRow fila in tabla.Rows)
+        {
+            if (fila[0] == DBNull.Value || string.IsNullOrEmpty(fila[0].ToString()))
+                continue;
+
+            var registro = new RegistroExcelRaw
+            {
+                Datos                = ObtenerColumna(fila, "DATOS", 0),
+                NumeroIdentificacion = ObtenerColumna(fila, "NUMERO DE IDENTIFICAION", 1),
+                Fecha                = ObtenerColumna(fila, "FECHA", 2),
+                NoRadicado           = ObtenerColumna(fila, "N°.\nRADICADO", 3),
+                NoFolios             = ObtenerColumna(fila, "N° DE FOLIOS", 4),
+                Placa                = ObtenerColumna(fila, "PLACA", 5),
+                Asunto               = ObtenerColumna(fila, "ASUNTO", 6),
+                Responsable          = ObtenerColumna(fila, "RESPONSABLE", 7)
+            };
+
+            lista.Add(registro);
+        }
+
+        return lista;
+    }
+}

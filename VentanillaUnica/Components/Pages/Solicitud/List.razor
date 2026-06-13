@@ -31,6 +31,34 @@
                         }
                     </select>
                 </div>
+                <div class="col-md-3">
+                    <label class="form-label form-label-sm">Tipo de Trámite</label>
+                    <select class="form-select form-select-sm"
+                            @bind="_filtros.TipoTramiteId"
+                            @bind:after="FiltrarAsync">
+                        <option value="">Todos los trámites</option>
+                        @foreach (var tipotramite in _tiposTramites)
+                        {
+                            <option value="@tipotramite.Id">@tipotramite.Name</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label form-label-sm">Nombre Ciudadano</label>
+                    <input type="text" 
+                           class="form-control form-control-sm" 
+                           @bind="_filtros.NombreCiudadano" 
+                           @bind:after="FiltrarAsync" 
+                           placeholder="Buscar por nombre..." />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label form-label-sm">Número Documento</label>
+                    <input type="text" 
+                           class="form-control form-control-sm" 
+                           @bind="_filtros.NumeroDocumento" 
+                           @bind:after="FiltrarAsync" 
+                           placeholder="Buscar por número de documento..." />
+                </div>
                 <div class="col-md-2">
                     <div class="form-check form-switch mt-3">
                         <input class="form-check-input" type="checkbox"

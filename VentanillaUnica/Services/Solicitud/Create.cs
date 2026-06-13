@@ -15,7 +15,7 @@ public partial class SolicitudManager
     
         if (tramite.TipoTramite?.RequierePlaca == true)
         {
-            if (string.IsNullOrWhiteSpace(request.Placa))
+            if (request.Placas != null && request.Placas.Count == 0)
             {
                 _logger.LogWarning("Se intentó crear una solicitud sin placa.");
                 throw new Exception("La placa es obligatoria para este tipo de trámite.");
@@ -32,7 +32,10 @@ public partial class SolicitudManager
             FechaSolicitud   = DateTime.UtcNow,
             FechaEstimadaFin = SumarDiasHabiles(DateTime.UtcNow, tramite.DiasEstimados ?? 0),
             Origen = request.Origen,
-            Placa = request.Placa,
+            Placas = request.Placas?.Select(placa => new SolicitudPlaca
+            {
+                Placa = placa.Trim(),
+            }).ToList(),
             NumeroFolio = request.NumeroFolio ?? "",
             CreadoPor = request.CreadoPor,
             FechaCreacion =  DateTime.UtcNow
@@ -43,7 +46,7 @@ public partial class SolicitudManager
         return solicitud;
     }
 
-    private async Task<string> GenerarRadicadoAsync()
+    public async Task<string> GenerarRadicadoAsync()
     {
         var anio  = DateTime.UtcNow.Year;
         var count = await _dbContext.Solicitudes

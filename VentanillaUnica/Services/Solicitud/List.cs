@@ -14,10 +14,32 @@ public partial class SolicitudManager
         var query = _dbContext.Solicitudes
             .AsNoTracking()
             .AsQueryable();
-
+        
         if (request.Estado is not null)
             query = query.Where(s => s.Estado == request.Estado);
 
+        if (!string.IsNullOrWhiteSpace(request.NombreCiudadano))
+        {
+            string terminoBusqueda = $"%{request.NombreCiudadano.Trim()}%";
+            
+            query = query.Where(s => 
+                EF.Functions.ILike(s.Ciudadano.PrimerNombre, terminoBusqueda) ||
+                EF.Functions.ILike(s.Ciudadano.SegundoNombre ?? string.Empty, terminoBusqueda) ||
+                EF.Functions.ILike(s.Ciudadano.PrimerApellido, terminoBusqueda) ||
+                EF.Functions.ILike(s.Ciudadano.SegundoApellido ?? string.Empty, terminoBusqueda));
+        }
+        if (!string.IsNullOrWhiteSpace(request.NumeroDocumento))
+        {
+            string terminoBusqueda = $"%{request.NumeroDocumento.Trim()}%";
+            
+            query = query.Where(s => 
+                EF.Functions.ILike(s.Ciudadano.NumeroDocumento, terminoBusqueda));
+        }
+        if (request.TipoTramiteId.HasValue)
+        {
+            query = query.Where(s=>s.Tramite.TipoTramiteId ==  request.TipoTramiteId.Value);
+        }
+        
         if (request.FuncionarioId is not null)
             query = query.Where(s => s.FuncionarioId == request.FuncionarioId);
 

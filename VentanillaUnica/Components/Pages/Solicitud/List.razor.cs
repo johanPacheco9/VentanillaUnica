@@ -5,12 +5,21 @@ using VentanillaUnica.Services.Solicitud;
 using VentanillaUnica.Services.Solicitud.Enums;
 using VentanillaUnica.Services.Solicitud.Requests;
 using VentanillaUnica.Services.Solicitud.Responses;
+using VentanillaUnica.Services.TiposTramites;
+using VentanillaUnica.Services.TiposTramites.Responses;
+using VentanillaUnica.Services.Tramites;
+using VentanillaUnica.Services.Tramites.Requests;
 
 namespace VentanillaUnica.Components.Pages.Solicitud;
 
 public partial class List
 {
     [Inject] public SolicitudManager SolicitudSvc { get; set; } = null!;
+    
+    [Inject] public TramitesManager  TramiteMngr { get; set; } =  null!;
+
+    [Inject]
+    public TiposTramitesManager TipoTramiteMngr { get; set; } = null!;
 
     private List<SolicitudSummaryDto> _solicitudes  = [];
     private bool                   _cargando     = true;
@@ -18,9 +27,14 @@ public partial class List
 
     private readonly ListSolicitudesRequest _filtros = new();
 
+    private readonly ListTramitesRequest _listTramitesRequest = new();
+    
+    private List<TiposTramiteResponseDto> _tiposTramites = [];
+    
     protected async override Task OnInitializedAsync()
     {
         await CargarAsync();
+        await GetTipoTramites();
     }
 
     private async Task CargarAsync()
@@ -51,8 +65,21 @@ public partial class List
         s.FechaEstimadaFin < DateTime.UtcNow &&
         s.Estado != EstadoSolicitud.Completada &&
         s.Estado != EstadoSolicitud.Rechazada;
-
     
+    private async Task GetTramites()
+    {
+        var response = TramiteMngr.GetTramites(_listTramitesRequest);
+    }
+
+    private async Task GetTipoTramites()
+    {
+        var response = await TipoTramiteMngr.List();
+        if (response.Any())
+        {
+            _tiposTramites = response;
+        }
+    }
+
     private async Task PaginaAnterior()
     {
         if (_filtros.Pagina > 1)
@@ -67,7 +94,7 @@ public partial class List
         _filtros.Pagina++;
         await CargarAsync();
     }
-
+    
     private static string GetBadgeEstado(EstadoSolicitud estado) => estado switch
     {
         EstadoSolicitud.Pendiente  => "bg-warning text-dark",

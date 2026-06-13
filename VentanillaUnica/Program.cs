@@ -10,6 +10,7 @@ using VentanillaUnica.Models;
 using VentanillaUnica.Services.Ciudadano;
 using VentanillaUnica.Services.Funcionarios;
 using VentanillaUnica.Services.Gestion;
+using VentanillaUnica.Services.Importacion;
 using VentanillaUnica.Services.Solicitud;
 using VentanillaUnica.Services.TiposTramites;
 using VentanillaUnica.Services.Tramites;
@@ -22,8 +23,10 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql("Host=localhost;Database=VentanillaUnica;Username=postgres;Password=adminsql26"));
-
+    options.UseNpgsql("Host=localhost;Database=VentanillaUnica;Username=postgres;Password=1098825894")
+        .EnableSensitiveDataLogging() // 
+        .EnableDetailedErrors()
+    );
 builder.Services.AddControllers();
 // Servicios de Negocio
 builder.Services.AddTransient<SolicitudManager>();
@@ -32,7 +35,8 @@ builder.Services.AddTransient<FuncionarioManager>();
 builder.Services.AddTransient<GestionManager>();
 builder.Services.AddTransient<TramitesManager>();
 builder.Services.AddTransient<TiposTramitesManager>();
-builder.Services.AddTransient<UserManager>(); // <-- ¡No olvides registrar tu UserManager!
+builder.Services.AddTransient<UserManager>();
+builder.Services.AddTransient<ImportacionService>();
 
 // Seguridad y Password Hashing
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();

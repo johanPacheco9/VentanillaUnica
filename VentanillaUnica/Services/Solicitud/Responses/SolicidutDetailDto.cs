@@ -9,7 +9,7 @@ public record SolicitudDetailDto(
     EstadoSolicitud Estado,
     DateTime? FechaRespuesta,
     string? Observaciones,
-    string? Placa,
+    List<string> Placas,
     string? NumeroFolio,
     // Información del Ciudadano
     int CiudadanoId,
